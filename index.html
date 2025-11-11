@@ -1956,7 +1956,19 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
       toast('서버 오류로 영상 생성에 실패했습니다.');
     }
   });
-})();
+})();<script>
+const BACKEND_BASE = window.location.origin;
+
+// ✅ API 연결 테스트용 함수
+async function testApiConnection() {
+  const res = await fetch(`${BACKEND_BASE}/api/gemini-image`, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ prompt: "테스트 이미지", count: 2 })
+  });
+  const data = await res.json();
+  alert(`서버 연결 성공!\n이미지 개수: ${data.images?.length || 0}`);
+}
 </script>
 </body>
 </html>
