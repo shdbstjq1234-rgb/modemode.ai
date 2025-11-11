@@ -1,0 +1,1962 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>mode l mode · AI 모델 스튜디오</title>
+<style>
+:root{
+  --brand:#ff6c0f;
+  --brand2:#ff9550;
+  --bg-dark:#050711;
+  --bg-light:#f7f5f0;
+}
+/* 기본 셋업 */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%;font-family:ui-sans-serif,system-ui,-apple-system,Segoe UI,Roboto,Apple SD Gothic Neo,Malgun Gothic,Helvetica,Arial}
+
+/* ===== 테마 (기본: 다크) ===== */
+.page{
+  --bg:var(--bg-dark);
+  --ink:#f7f9fc;
+  --muted:#9ca3b4;
+  --line:#262a3c;
+  --glass:rgba(8,10,16,.8);
+  --panel:#101424;
+  --bd:#282f46;
+  --field:#0d1220;
+  --chip:#171c2c;
+  --chip-on:#222a3f;
+  --preview:#090c18;
+  --code:#050814;
+  --btn-bg:rgba(255,255,255,.06);
+  --badge:#272f46;
+  color:var(--ink);
+  background:
+    radial-gradient(900px 600px at 10% 0%, rgba(255,122,33,.18), transparent 55%),
+    radial-gradient(900px 600px at 90% 0%, rgba(255,149,80,.16), transparent 60%),
+    var(--bg);
+  min-height:100vh;
+}
+#themeSwitch:checked ~ .page{
+  --bg:var(--bg-light);
+  --ink:#12131a;
+  --muted:#747070;
+  --line:#e2ddd1;
+  --glass:rgba(255,255,255,.9);
+  --panel:#fdfbf7;
+  --bd:#d5d0c4;
+  --field:#f3f0e8;
+  --chip:#ebe6dd;
+  --chip-on:#e0d7c9;
+  --preview:#f3efe7;
+  --code:#f8f4ed;
+  --btn-bg:rgba(0,0,0,.04);
+  --badge:#ebe5da;
+}
+
+/* 공통 */
+.hidden{display:none}
+a{color:inherit}
+button{font-family:inherit}
+
+/* 상단 바 */
+.topbar{
+  position:fixed; inset:0 0 auto 0; z-index:90;
+  background:var(--glass); backdrop-filter:saturate(180%) blur(14px);
+  border-bottom:1px solid var(--line);
+}
+.topbar-inner{
+  max-width:1200px;margin:0 auto;
+  display:flex;align-items:center;justify-content:space-between;
+  padding:8px 18px;
+}
+.logo-wrap{display:flex;align-items:center;gap:10px}
+.svglogo{width:34px;height:34px;border-radius:10px;display:grid;place-items:center;
+  background:radial-gradient(circle at 0% 0%,#ffb25f,#ff6c0f);
+  box-shadow:0 10px 26px rgba(0,0,0,.35);
+}
+.svglogo svg{width:22px;height:22px}
+.brand-name{font-weight:900;letter-spacing:.18px;font-size:18px}
+.main-nav{display:flex;align-items:center;gap:8px;margin-left:24px}
+.nav-link{
+  border:none;background:transparent;color:var(--muted);
+  padding:8px 12px;border-radius:999px;font-size:14px;cursor:pointer;
+}
+.nav-link.active{color:var(--ink);background:var(--btn-bg);font-weight:700}
+.topbar-right{display:flex;align-items:center;gap:8px}
+.authbtn{
+  display:inline-flex;align-items:center;gap:6px;
+  padding:8px 12px;border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--btn-bg);
+  font-size:13px;font-weight:700;
+  text-decoration:none;color:var(--ink);cursor:pointer;
+}
+.authbtn.primary{
+  border:none;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  color:#070709;
+}
+.themebtn{
+  display:inline-grid;place-items:center;
+  width:34px;height:34px;border-radius:50%;
+  border:1px solid var(--line);background:var(--btn-bg);
+  cursor:pointer;
+}
+.themebtn svg{width:18px;height:18px}
+.themebtn .sun{display:block}
+.themebtn .moon{display:none}
+#themeSwitch:checked ~ .page .themebtn .sun{display:none}
+#themeSwitch:checked ~ .page .themebtn .moon{display:block}
+
+/* ===== 전체 레이아웃 ===== */
+.shell{padding-top:56px;}
+.view{
+  display:none;
+  min-height:calc(100vh - 56px);
+  padding:32px 16px 40px;
+}
+.view.active{display:block}
+.container{max-width:1200px;margin:0 auto}
+
+/* ===== HOME / 랜딩 ===== */
+.hero{
+  display:grid;
+  grid-template-columns:minmax(0,1.2fr) minmax(0,1fr);
+  gap:40px;
+  align-items:center;
+}
+.hero-copy h1{
+  font-size:40px;line-height:1.15;margin:0 0 10px 0;letter-spacing:-0.04em;
+}
+.hero-copy h1 strong{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.hero-copy p{margin:0 0 18px 0;font-size:15px;color:var(--muted)}
+.hero-cta{display:flex;flex-wrap:wrap;gap:10px}
+.btn{
+  padding:11px 16px;border-radius:999px;
+  border:1px solid var(--line);
+  background:var(--btn-bg);
+  color:var(--ink);
+  font-size:14px;font-weight:800;
+  cursor:pointer;text-decoration:none;
+}
+.btn.primary{
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+  border:none;color:#050508;
+}
+.btn.soft{background:var(--chip)}
+.hero-preview{
+  border-radius:22px;
+  background:radial-gradient(circle at 0% 0%, rgba(255,132,78,.25), transparent 60%),
+             radial-gradient(circle at 100% 100%, rgba(151,210,255,.18), transparent 55%),
+             var(--panel);
+  border:1px solid var(--bd);
+  padding:14px;
+  box-shadow:0 28px 80px rgba(0,0,0,.40);
+}
+.hero-preview-inner{
+  border-radius:16px;
+  background:var(--preview);
+  border:1px dashed var(--bd);
+  height:260px;
+  display:grid;place-items:center;
+  color:var(--muted);font-size:13px;
+}
+.hero-stats{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px;font-size:11px;color:var(--muted)}
+.hero-stat-pill{
+  padding:6px 10px;border-radius:999px;
+  background:var(--badge);
+  border:1px solid var(--line);
+}
+
+/* 기능 섹션 */
+.feature-grid{
+  margin-top:36px;
+  display:grid;
+  gap:14px;
+  grid-template-columns:repeat(3, minmax(0,1fr));
+}
+.feature-card{
+  background:var(--panel);border:1px solid var(--bd);
+  border-radius:16px;padding:14px 14px 16px;
+}
+.feature-card h3{margin:0 0 4px 0;font-size:15px}
+.feature-card p{margin:0;font-size:12px;color:var(--muted)}
+.feature-tag{font-size:11px;color:var(--muted);margin-bottom:6px}
+
+/* ===== 캐릭터 추천 페이지 ===== */
+.char-header{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:16px}
+.char-header-title h2{margin:0 0 4px 0;font-size:22px}
+.char-header-title p{margin:0;font-size:13px;color:var(--muted)}
+.char-filters{display:flex;flex-wrap:wrap;gap:8px}
+.chip{
+  padding:7px 11px;border-radius:999px;
+  border:1px solid var(--bd);
+  background:var(--chip);
+  font-size:12px;color:var(--muted);
+  cursor:pointer;
+}
+.chip.active{background:var(--chip-on);color:var(--ink);border-color:var(--brand)}
+.char-search-row{
+  display:flex;flex-wrap:wrap;gap:10px;align-items:center;
+  margin-bottom:14px;
+}
+.input{
+  width:100%;padding:9px 11px;border-radius:10px;
+  border:1px solid var(--bd);background:var(--field);
+  color:var(--ink);font-size:13px;
+}
+.char-search{flex:1 1 220px}
+.char-sort{display:flex;gap:6px}
+.char-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill, minmax(240px,1fr));
+  gap:12px;
+}
+.char-card{
+  background:var(--panel);
+  border:1px solid var(--bd);
+  border-radius:16px;
+  padding:12px 12px 10px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.char-top{display:flex;gap:10px}
+.avatar{
+  width:46px;height:46px;border-radius:40%;
+  background:radial-gradient(circle at 0% 0%, #ffd7a1,#ff9453);
+  display:grid;place-items:center;
+  font-weight:900;color:#23160d;font-size:18px;
+}
+.avatar.badge-news{background:radial-gradient(circle at 0% 0%, #ffe7a1,#ffc653);}
+.avatar.badge-soft{background:radial-gradient(circle at 0% 0%, #c3f0ff,#4cb1ff);}
+.char-meta{flex:1}
+.char-name{font-weight:800;font-size:14px;margin-bottom:2px;display:flex;align-items:center;gap:6px}
+.char-tags{font-size:11px;color:var(--muted)}
+.char-tags span{margin-right:4px}
+.char-body{font-size:12px;color:var(--muted);min-height:34px}
+.char-actions{
+  display:flex;align-items:center;justify-content:space-between;margin-top:4px;
+}
+.play-btn{
+  border-radius:999px;border:1px solid var(--bd);
+  width:32px;height:32px;display:grid;place-items:center;
+  background:var(--field);cursor:pointer;font-size:14px;
+}
+.play-btn::before{content:"▶"}
+.char-actions-right{display:flex;gap:6px}
+
+/* ===== 스튜디오(메인 편집기) ===== */
+.studio-layout{
+  display:grid;
+  grid-template-columns:320px minmax(0,1fr);
+  gap:16px;
+}
+.panel{
+  background:var(--panel);
+  border:1px solid var(--bd);
+  border-radius:18px;
+  padding:16px;
+}
+.panel-title{font-weight:800;font-size:15px;margin-bottom:10px}
+.cap{display:block;font-weight:600;color:var(--muted);margin-bottom:6px;font-size:12px}
+.group{margin-bottom:14px}
+.menu-trigger{
+  width:100%;display:flex;justify-content:space-between;align-items:center;
+  padding:9px 11px;border-radius:10px;
+  background:var(--field);border:1px solid var(--bd);
+  color:var(--ink);font-size:13px;cursor:pointer;
+}
+.menu-trigger span:last-child{font-size:11px;color:var(--muted)}
+.menu-panel{position:relative}
+.menu-pop{
+  position:absolute;top:6px;left:0;width:100%;
+  background:var(--panel);border-radius:12px;
+  border:1px solid var(--bd);box-shadow:0 20px 60px rgba(0,0,0,.5);
+  padding:10px;display:none;z-index:40;
+}
+.menu-pop.show{display:block}
+.menu-search{margin-bottom:8px}
+.menu-grid{
+  display:grid;grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:6px;max-height:220px;overflow:auto;
+}
+.menu-item{
+  padding:8px 9px;border-radius:10px;
+  background:var(--field);border:1px solid var(--bd);
+  font-size:12px;cursor:pointer;
+}
+.menu-item.active{border-color:var(--brand);box-shadow:0 0 0 2px rgba(255,122,33,.28) inset}
+.fav-row{display:flex;flex-wrap:wrap;gap:6px}
+.fav{
+  padding:7px 10px;border-radius:999px;
+  border:1px solid var(--bd);background:var(--chip);
+  font-size:12px;cursor:pointer;
+}
+.fav.active,.fav:hover{background:var(--chip-on)}
+.preview-box{
+  height:360px;border-radius:16px;
+  border:1px dashed var(--bd);
+  background:var(--preview);
+  display:grid;place-items:center;
+  color:var(--muted);font-size:13px;
+  margin-bottom:10px;
+}
+.seg{display:flex;flex-wrap:wrap;gap:6px}
+.seg .opt{
+  padding:6px 10px;border-radius:999px;
+  border:1px solid var(--bd);background:var(--chip);
+  font-size:11px;cursor:pointer;
+}
+.seg .opt.active{background:var(--chip-on);border-color:var(--brand)}
+.divider{height:1px;background:var(--bd);margin:10px 0}
+code#promptOutput{
+  display:block;white-space:pre-wrap;
+  background:var(--code);border-radius:10px;
+  border:1px solid var(--bd);
+  padding:10px;font-size:12px;min-height:80px;
+}
+.row-inline{display:flex;gap:8px;align-items:center;margin-bottom:6px}
+
+/* ===== 모델 선택 전체 보기 (캐스팅) ===== */
+.view-models .filters-layout{
+  display:grid;
+  grid-template-columns:260px minmax(0,1fr);
+  gap:18px;
+}
+.filter-card{background:var(--panel);border-radius:18px;border:1px solid var(--bd);padding:14px}
+.filter-card h3{margin:0 0 8px 0;font-size:15px}
+.filter-section{margin-bottom:12px}
+.filter-section h4{margin:0 0 4px 0;font-size:12px;color:var(--muted)}
+.filter-list{display:flex;flex-direction:column;gap:4px;font-size:12px}
+.filter-list label{display:flex;gap:6px;align-items:center;cursor:pointer}
+.model-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px}
+
+/* 마이페이지 미니 드롭다운 */
+.mypage{position:relative}
+.mypage-btn{
+  display:inline-flex;align-items:center;gap:8px;
+  padding:8px 12px;border-radius:999px;
+  border:1px solid var(--line);background:var(--btn-bg);
+  cursor:pointer;font-size:13px;font-weight:800;
+}
+.mypage-avatar{
+  width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(135deg,var(--brand),var(--brand2));
+}
+.mypage-menu{
+  position:absolute;right:0;top:calc(100% + 8px);
+  min-width:200px;padding:6px;
+  background:var(--panel);border-radius:12px;
+  border:1px solid var(--bd);box-shadow:0 20px 60px rgba(0, 0, 0, 0.55);
+  display:none;z-index:50;
+}
+.mypage-menu a{
+  display:flex;align-items:center;gap:6px;
+  padding:8px;border-radius:8px;
+  font-size:13px;text-decoration:none;color:var(--ink);
+}
+.mypage-menu a:hover{background:var(--btn-bg)}
+.mypage.open .mypage-menu{display:block}
+
+/* 모달 (로그인/회원가입) */
+.modal{position:fixed;inset:0;display:none;place-items:center;z-index:1000}
+.modal.show{display:grid}
+.modal-backdrop{position:absolute;inset:0;background:rgb(255, 255, 255);backdrop-filter:blur(4px)}
+.modal-card{
+  position:relative;width:min(420px,94vw);max-height:92vh;
+  background:var(--panel);border-radius:16px;
+  border:1px solid var(--bd);box-shadow:0 28px 80px rgb(255, 255, 255);
+  color:var(--ink);display:flex;flex-direction:column;
+}
+.modal-head{
+  padding:14px 16px;border-bottom:1px solid var(--bd);
+  display:flex;align-items:center;justify-content:space-between;gap:8px;
+  background:var(--glass);
+}
+.modal-head h3{margin:0;font-size:16px}
+.modal-body{padding:16px;overflow:auto}
+.close-x{
+  width:32px;height:32px;border-radius:10px;
+  border:1px solid var(--line);background:var(--btn-bg);
+  display:grid;place-items:center;cursor:pointer;
+}
+.field{margin-bottom:12px}
+.label{display:block;font-size:12px;font-weight:700;color:var(--muted);margin-bottom:4px}
+.error{color:#ff6b6b;font-size:11px;margin-top:4px;display:none}
+.error.show{display:block}
+.hint-sm{font-size:11px;color:var(--muted)}
+.tabs{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:10px}
+.tab{
+  padding:5px 10px;border-radius:999px;
+  border:1px solid var(--bd);background:var(--chip);
+  font-size:11px;font-weight:700;color:var(--muted);
+}
+.tab.on{background:var(--chip-on);color:var(--ink);border-color:var(--brand)}
+.consent-box{
+  border-radius:10px;border:1px solid var(--bd);background:var(--field);
+  padding:10px;max-height:220px;overflow:auto;font-size:12px;
+}
+.consent-line{display:flex;gap:8px;align-items:flex-start;padding:7px 4px;border-bottom:1px dashed var(--bd)}
+.consent-line:last-child{border-bottom:none}
+
+/* 반응형 */
+@media (max-width:900px){
+  .hero{grid-template-columns:1fr;gap:24px}
+  .hero-preview-inner{height:220px}
+  .feature-grid{grid-template-columns:1fr}
+  .studio-layout{grid-template-columns:1fr}
+  .view-models .filters-layout{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<input type="checkbox" id="themeSwitch" hidden>
+
+<div class="page">
+<header class="topbar">
+  <div class="topbar-inner">
+    <div style="display:flex;align-items:center;gap:10px">
+      <div class="logo-wrap">
+        <div class="svglogo">
+          <svg viewBox="0 0 28 28" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff7e0"/><stop offset="1" stop-color="#ffe0b0"/></linearGradient></defs>
+            <path d="M4 8 C10 2, 18 2, 24 8" stroke="rgba(0,0,0,.28)" stroke-width="4" stroke-linecap="round"/>
+            <path d="M4 8 C10 2, 18 2, 24 8" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+            <path d="M4 20 C10 26, 18 26, 24 20" stroke="rgba(0,0,0,.26)" stroke-width="4" stroke-linecap="round"/>
+            <path d="M4 20 C10 26, 18 26, 24 20" stroke="url(#g)" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="10" cy="14" r="2.1" fill="#05050a"/>
+            <circle cx="18" cy="14" r="2.1" fill="#05050a"/>
+          </svg>
+        </div>
+        <div class="brand-name">mode l mode</div>
+      </div>
+
+      <nav class="main-nav">
+        <button class="nav-link active" data-view="home">홈</button>
+        <button class="nav-link" data-view="characters">캐릭터 추천</button>
+        <button class="nav-link" data-view="studio">스튜디오</button>
+        <button class="nav-link" data-view="models">전체 캐릭터</button>
+      </nav>
+    </div>
+
+    <div class="topbar-right">
+      <button class="authbtn" id="loginBtnTop">로그인</button>
+      <button class="authbtn primary" id="signupBtnTop">회원가입</button>
+      <label for="themeSwitch" class="themebtn" title="라이트/다크 전환">
+        <svg class="sun" viewBox="0 0 24 24"><circle cx="12" cy="12" r="4" fill="currentColor"/><g stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><line x1="12" y1="1.8" x2="12" y2="4.2"/><line x1="12" y1="19.8" x2="12" y2="22.2"/><line x1="4.22" y1="4.22" x2="5.9" y2="5.9"/><line x1="18.1" y1="18.1" x2="19.78" y2="19.78"/><line x1="1.8" y1="12" x2="4.2" y2="12"/><line x1="19.8" y1="12" x2="22.2" y2="12"/><line x1="4.22" y1="19.78" x2="5.9" y2="18.1"/><line x1="18.1" y1="5.9" x2="19.78" y2="4.22"/></g></svg>
+        <svg class="moon" viewBox="0 0 24 24"><path d="M21 13.1A8.5 8.5 0 0 1 11 3a.5.5 0 0 0-.6-.6A9.5 9.5 0 1 0 21.6 21.6a.5.5 0 0 0-.6-.6 8.5 8.5 0 0 1 0-7.9z" fill="currentColor"/></svg>
+      </label>
+    </div>
+  </div>
+</header>
+
+<main class="shell">
+  <!-- ===== HOME ===== -->
+  <section id="view-home" class="view view-home active">
+    <div class="container">
+      <div class="hero">
+        <div class="hero-copy">
+          <p style="font-size:12px;color:var(--muted);margin:0 0 8px 0;">AI 모델 스튜디오 · 클로즈드 베타</p>
+          <h1>촬영 없이,<br><strong>룩북·영상까지 한 번에.</strong></h1>
+          <p>모델, 샷 사이즈, 카메라 앵글까지. 드롭다운으로 고르고 프롬프트만 추가하면
+            <b>10분 안에 시안</b>이 완성됩니다.</p>
+          <div class="hero-cta">
+            <button class="btn primary" data-view-target="studio">스튜디오 바로 열기</button>
+            <button class="btn soft" data-view-target="characters">캐릭터 먼저 둘러보기</button>
+            <button class="btn" data-view-target="models">전체 캐릭터 보기</button>
+          </div>
+          <div class="hero-stats">
+            <span class="hero-stat-pill">샷 프리셋 20+</span>
+            <span class="hero-stat-pill">카메라 무빙 15+</span>
+            <span class="hero-stat-pill">룩북·브랜디드·커머스 템플릿 제공</span>
+          </div>
+        </div>
+        <div class="hero-preview">
+          <div class="hero-preview-inner">
+            <div style="text-align:center">
+              <div style="font-size:13px;margin-bottom:6px;">왼쪽의 옵션을 선택하면</div>
+              <div style="font-size:16px;font-weight:800;margin-bottom:4px;">여기에 미리보기가 나타납니다.</div>
+              <div style="font-size:11px;color:var(--muted)">스튜디오에서 카메라 앵글, 무빙, 모델을 조합해 보세요.</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <section class="feature-grid" aria-label="주요 기능">
+        <article class="feature-card">
+          <div class="feature-tag">01 · 룩 디렉션 프리셋</div>
+          <h3>샷 사이즈 & 앵글을 클릭 한 번으로</h3>
+          <p>ECU부터 풀샷까지, 촬영 감독들이 쓰는 용어 그대로 정리된 프리셋으로 구도를 빠르게 맞출 수 있어요.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-tag">02 · 카메라 무빙</div>
+          <h3>팬, 틸트, 돌리 인까지 자동 애니메이션</h3>
+          <p>정지 컷부터 오비탈, 핸드헬드까지. 원하는 무빙만 고르면 알아서 타임라인에 적용됩니다.</p>
+        </article>
+        <article class="feature-card">
+          <div class="feature-tag">03 · 캐릭터 스튜디오</div>
+          <h3>연령·성별과 상관없이, 언제 어디서나 모델을 활용해 콘텐츠 생산</h3>
+          <p>콘셉트에 맞는 캐릭터를 추천받고, 스튜디오에서 바로 모델·포즈·감정을 바꿔보세요.</p>
+        </article>
+      </section>
+    </div>
+  </section>
+
+  <!-- ===== 캐릭터 추천 ===== -->
+  <section id="view-characters" class="view view-characters">
+    <div class="container">
+      <div class="char-header">
+        <div class="char-header-title">
+          <h2>지금 많이 쓰이는 캐릭터</h2>
+          <p>시작할 때 고민된다면, 아래 캐릭터로 먼저 테스트를 돌려보세요.</p>
+        </div>
+        <div class="char-filters">
+          <div class="chip active" data-char-filter="all">전체</div>
+          <div class="chip" data-char-filter="news">캐주얼</div>
+          <div class="chip" data-char-filter="commerce">커머스</div>
+          <div class="chip" data-char-filter="casual">힙/올드패션</div>
+        </div>
+      </div>
+
+      <div class="char-search-row">
+        <div class="char-search">
+          <input id="charSearchInput" class="input" placeholder="이름 또는 태그로 검색 (예: 힙합, 빈티지, 비즈니스, 오피스룩">
+        </div>
+        <div class="char-sort">
+          <button class="chip" data-char-sort="popular">인기순</button>
+          <button class="chip" data-char-sort="recent">최근 추가</button>
+        </div>
+      </div>
+
+      <div id="charGrid" class="char-grid"></div>
+    </div>
+  </section>
+
+  <!-- ===== 스튜디오 ===== -->
+  <section id="view-studio" class="view view-studio">
+    <div class="container">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:14px">
+        <div>
+          <h2 style="margin:0 0 4px 0;font-size:22px">스튜디오</h2>
+          <p style="margin:0;font-size:13px;color:var(--muted)">원하는 모델, 샷, 카메라 설정을 선택하면 자동으로 프롬프트가 들어가요.</p>
+        </div>
+        <div style="display:flex;gap:8px">
+          <button class="btn soft" data-view-target="characters">추천 캐릭터 보기</button>
+          <button class="btn" data-view-target="models">전체 캐릭터 보기</button>
+        </div>
+      </div>
+
+      <div class="studio-layout">
+        <aside class="panel">
+          <div class="panel-title">프로젝트 설정</div>
+
+          <div class="group">
+            <label class="cap">프로젝트 이름</label>
+            <input id="projName" class="input" type="text" placeholder="예: 2025 S/S 룩북 A세트">
+          </div>
+
+          <div class="group">
+            <label class="cap">모델</label>
+            <button class="menu-trigger" id="modelMenuBtn">
+              <span><b id="modelCurrent">민정</b></span>
+              <span>변경 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="modelMenu">
+                <div class="menu-search">
+                  <input id="modelSearch" class="input" type="text" placeholder="모델 검색 (예: 지수, 준호...)">
+                </div>
+                <div id="modelGridMenu" class="menu-grid"></div>
+              </div>
+            </div>
+            <div style="margin-top:8px">
+              <span class="cap">자주 쓰는 모델</span>
+              <div class="fav-row" id="favRow">
+                <div class="fav" data-model="민서">민서</div>
+                <div class="fav" data-model="지영">지영</div>
+                <div class="fav" data-model="윤섭">윤섭</div>
+                <div class="fav" data-model="겨례">겨례</div>
+              </div>
+              <button class="btn" style="margin-top:8px;width:100%;font-size:12px" data-view-target="models">
+                전체 캐릭터에서 고르기
+              </button>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">샷 사이즈</label>
+            <button class="menu-trigger" id="sizeMenuBtn">
+              <span><b id="sizeCurrent">WS (Waist-up)</b></span>
+              <span>프리셋 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="sizeMenu">
+                <div class="menu-grid" id="sizeGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">상품</label>
+            <button class="menu-trigger" id="productMenuBtn">
+              <span><b id="productCurrent">이미지/설명 설정</b></span>
+              <span>업로드 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="productMenu">
+                <div class="menu-search">
+                  <input id="productDesc" class="input" type="text" placeholder="예: beige trench coat, double-breasted, minimal">
+                </div>
+                <div style="display:flex;gap:10px;align-items:flex-start">
+                  <div style="flex:1">
+                    <label class="cap">상품 이미지 업로드</label>
+                    <input id="productImage" type="file" accept="image/*" class="input">
+                    <div class="hint-sm" style="margin-top:6px">PNG/JPG 10MB 이하 · 배경 자동 제거 예정</div>
+                  </div>
+                  <div id="productThumb" style="width:130px;height:100px;border-radius:10px;border:1px dashed var(--bd);display:grid;place-items:center;background:var(--preview);font-size:11px;color:var(--muted)">IMAGE</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">포즈</label>
+            <button class="menu-trigger" id="poseMenuBtn">
+              <span><b id="poseCurrent">서기</b></span>
+              <span>포즈 선택 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="poseMenu">
+                <div class="menu-search">
+                  <input id="poseSearch" class="input" type="text" placeholder="예: 서기, 팔짱, 손 주머니">
+                </div>
+                <div class="menu-grid" id="poseGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">감정</label>
+            <button class="menu-trigger" id="emoMenuBtn">
+              <span><b id="emoCurrent">밝음</b></span>
+              <span>무드 선택 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="emoMenu">
+                <div class="menu-search">
+                  <input id="emoSearch" class="input" type="text" placeholder="예: 밝음, 진지, 시크">
+                </div>
+                <div class="menu-grid" id="emoGrid"></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">카메라 앵글</label>
+            <button class="menu-trigger" id="angleMenuBtn">
+              <span><b id="angleCurrent">아이레벨</b></span>
+              <span>프리셋 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="angleMenu">
+                <div class="menu-search">
+                  <input id="angleSearch" class="input" type="text" placeholder="예: 아이레벨, 하이, 로우">
+                </div>
+                <div class="menu-grid" id="angleGrid"></div>
+                <div class="divider"></div>
+                <div id="angleMini" style="height:110px;border-radius:10px;border:1px dashed var(--bd);display:grid;place-items:center;background:var(--preview);font-size:11px;color:var(--muted)">ANGLE</div>
+                <div style="margin-top:8px">
+                  <label class="cap">레퍼런스 이미지 (선택)</label>
+                  <input id="angleImage" type="file" accept="image/*" class="input">
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">카메라 무빙</label>
+            <button class="menu-trigger" id="moveMenuBtn">
+              <span><b id="moveCurrent">Static</b></span>
+              <span>무빙 선택 ▾</span>
+            </button>
+            <div class="menu-panel">
+              <div class="menu-pop" id="moveMenu">
+                <div class="menu-search">
+                  <div class="seg" id="moveCats">
+                    <div class="opt active" data-cat="linear">Linear</div>
+                    <div class="opt" data-cat="rotation">Rotation</div>
+                    <div class="opt" data-cat="vertical">Vertical</div>
+                    <div class="opt" data-cat="complex">Complex</div>
+                  </div>
+                </div>
+                <div class="menu-grid" id="moveGrid"></div>
+                <div class="divider"></div>
+                <div id="moveMini" style="height:90px;border-radius:10px;border:1px dashed var(--bd);display:grid;place-items:center;background:var(--preview);font-size:11px;color:var(--muted)">MOVEMENT</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="group">
+            <label class="cap">추가 설명 (옵션)</label>
+            <input id="extraDesc" class="input" type="text" placeholder="예: studio lighting, white background, sharp focus">
+          </div>
+        </aside>
+
+        <section class="panel">
+          <div class="panel-title">프리뷰 & 프롬프트</div>
+          <div id="previewBox" class="preview-box">PREVIEW</div>
+
+          <div class="group">
+            <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px">
+              <label class="cap">프롬프트</label>
+              <button class="btn" id="togglePrompt" style="padding:4px 10px;font-size:11px;background:var(--chip)">접기/펼치기</button>
+            </div>
+            <div class="row-inline">
+              <input id="promptInput" class="input" type="text" placeholder="추가로 설명할 내용을 입력하거나 음성으로 말하세요. Enter로 적용">
+              <button class="btn" id="promptEnter" style="padding-inline:12px;font-size:12px">Enter</button>
+              <button class="btn" id="promptMic" style="padding-inline:10px;font-size:13px" title="음성 입력" aria-label="음성 입력">🎤</button>
+            </div>
+            <code id="promptOutput"></code>
+          </div>
+        </section>
+      </div>
+    </div>
+  </section>
+
+  <!-- ===== 전체 캐릭터 (캐스팅) ===== -->
+  <section id="view-models" class="view view-models">
+    <div class="container">
+      <div style="display:flex;align-items:flex-end;justify-content:space-between;margin-bottom:16px">
+        <div>
+          <h2 style="margin:0 0 4px 0;font-size:22px">캐릭터 캐스팅</h2>
+          <p style="margin:0;font-size:13px;color:var(--muted)">언어, 성별, 스타일 필터로 원하는 캐릭터를 빠르게 찾을 수 있어요.</p>
+        </div>
+        <button class="btn soft" data-view-target="studio" id="btnBackToStudioFromModels">선택 후 스튜디오로</button>
+      </div>
+
+      <div class="filters-layout">
+        <aside class="filter-card">
+          <h3>필터</h3>
+
+          <div class="filter-section">
+            <h4>언어</h4>
+            <div class="filter-list">
+              <label><input type="checkbox" class="mdl-filter-lang" value="ko" checked> 한국어</label>
+              <label><input type="checkbox" class="mdl-filter-lang" value="en"> 영어</label>
+              <label><input type="checkbox" class="mdl-filter-lang" value="jp"> 일본어</label>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <h4>톤 & 역할</h4>
+            <div class="filter-list">
+              <label><input type="checkbox" class="mdl-filter-role" value="news"> 20대/힙합</label>
+              <label><input type="checkbox" class="mdl-filter-role" value="commerce"> 30대/오피스룩·비즈니스룩</label>
+              <label><input type="checkbox" class="mdl-filter-role" value="casual"> 40대/영포티</label>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <h4>성별</h4>
+            <div class="filter-list">
+              <label><input type="checkbox" class="mdl-filter-gender" value="f" checked> 여성</label>
+              <label><input type="checkbox" class="mdl-filter-gender" value="m" checked> 남성</label>
+            </div>
+          </div>
+
+          <div class="filter-section">
+            <h4>정렬</h4>
+            <div class="filter-list">
+              <label><input type="radio" name="mdlSort" value="popular" checked> 인기순</label>
+              <label><input type="radio" name="mdlSort" value="new"> 최신순</label>
+            </div>
+          </div>
+        </aside>
+
+        <div>
+          <div style="display:flex;gap:10px;margin-bottom:10px;align-items:center;flex-wrap:wrap">
+            <input id="mdlSearchInput" class="input" placeholder="캐릭터 이름 또는 태그 검색">
+            <div style="font-size:12px;color:var(--muted)">선택 후 카드의 <b>“스튜디오에서 사용”</b> 버튼을 눌러주세요.</div>
+          </div>
+          <div id="modelGridAll" class="model-grid"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+</div>
+
+<!-- ===== 로그인 모달 ===== -->
+<div id="loginModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="loginTitle">
+  <div class="modal-backdrop" data-close="loginModal"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="loginTitle">로그인</h3>
+      <button class="close-x" data-close="loginModal" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <p class="hint-sm" style="margin:0 0 12px 0">이메일과 비밀번호로 로그인합니다. (데모: 서버 없이 동작)</p>
+      <div class="field">
+        <label class="label" for="loginEmail">이메일</label>
+        <input id="loginEmail" class="input" type="email" placeholder="name@example.com" autocomplete="username">
+        <div id="loginEmailErr" class="error">유효한 이메일을 입력해 주세요.</div>
+      </div>
+      <div class="field">
+        <label class="label" for="loginPw">비밀번호</label>
+        <input id="loginPw" class="input" type="password" placeholder="비밀번호" autocomplete="current-password">
+        <div id="loginPwErr" class="error">비밀번호를 입력해 주세요.</div>
+      </div>
+      <div class="field">
+        <button id="loginSubmit" class="btn primary" style="width:100%">로그인</button>
+      </div>
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <span class="hint-sm"><a href="#" id="openReset">비밀번호 재설정</a></span>
+        <span class="hint-sm">계정이 없으신가요? <a href="#" id="openSignupFromLogin">회원가입</a></span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== 회원가입 모달 ===== -->
+<div id="signupModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="signupTitle">
+  <div class="modal-backdrop" data-close="signupModal"></div>
+  <div class="modal-card">
+    <div class="modal-head">
+      <h3 id="signupTitle">회원가입</h3>
+      <button class="close-x" data-close="signupModal" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="tabs">
+        <div class="tab on" data-step="1">이메일</div>
+        <div class="tab" data-step="2">인증</div>
+        <div class="tab" data-step="3">비밀번호</div>
+        <div class="tab" data-step="4">동의</div>
+        <div class="tab" data-step="5">완료</div>
+      </div>
+
+      <!-- step1 -->
+      <section id="st1">
+        <div class="field">
+          <label class="label" for="s1name">이름</label>
+          <input id="s1name" class="input" type="text" placeholder="홍길동">
+          <div id="s1nameErr" class="error">이름을 입력해 주세요.</div>
+        </div>
+        <div class="field">
+          <label class="label" for="s1e">이메일</label>
+          <input id="s1e" class="input" type="email" placeholder="name@example.com" autocomplete="email">
+          <div id="s1err" class="error">유효한 이메일을 입력해 주세요.</div>
+        </div>
+        <button id="s1next" class="btn primary" style="width:100%">계속</button>
+      </section>
+
+      <!-- step2 -->
+      <section id="st2" style="display:none">
+        <div class="field">
+          <label class="label" for="s2c">이메일로 전송된 인증코드</label>
+          <input id="s2c" class="input" type="text" placeholder="6자리 코드" maxlength="6" inputmode="numeric">
+          <div id="s2err" class="error">코드가 올바르지 않거나 만료되었습니다. (데모라 임의 6자리면 통과)</div>
+          <div class="hint-sm">코드 유효시간 10분 · 재전송은 30초마다 가능합니다.</div>
+        </div>
+        <div class="field" style="display:flex;gap:8px">
+          <button id="s2resend" class="btn" style="flex:1">코드 재전송</button>
+          <button id="s2next" class="btn primary" style="flex:1">다음</button>
+        </div>
+      </section>
+
+      <!-- step3 -->
+      <section id="st3" style="display:none">
+        <div class="field">
+          <label class="label" for="s3p1">비밀번호</label>
+          <input id="s3p1" class="input" type="password" placeholder="영문 대/소, 숫자, 특수문자 포함 8자 이상">
+        </div>
+        <div class="field">
+          <label class="label" for="s3p2">비밀번호 확인</label>
+          <input id="s3p2" class="input" type="password" placeholder="비밀번호 재입력">
+          <div id="s3err" class="error">비밀번호 정책 미충족 또는 불일치</div>
+        </div>
+        <button id="s3next" class="btn primary" style="width:100%">다음</button>
+      </section>
+
+      <!-- step4 -->
+      <section id="st4" style="display:none">
+        <div class="consent-box">
+          <div class="consent-line">
+            <input type="checkbox" id="c_tos" style="margin-top:3px">
+            <div>
+              <b>[필수] 이용약관 동의</b>
+              <details class="hint-sm"><summary>전문 보기</summary>
+                <p>전자상거래법·정보통신망법·개인정보보호법을 준수하며, 회원 및 회사의 권리·의무, 서비스 이용 조건, 계약 해지, 분쟁 해결 절차 등을 규정합니다.</p>
+              </details>
+            </div>
+          </div>
+          <div class="consent-line">
+            <input type="checkbox" id="c_privacy" style="margin-top:3px">
+            <div>
+              <b>[필수] 개인정보 수집·이용 동의</b>
+              <details class="hint-sm"><summary>요약 보기</summary>
+                <p><b>수집 항목</b> : 이메일, 비밀번호(해시), 닉네임(선택), 접속기록/쿠키, 결제정보(결제 시)</p>
+                <p><b>이용 목적</b> : 회원 식별·관리, 서비스 제공, 결제/정산, 부정 이용 방지, 고객지원, 알림 발송</p>
+                <p><b>보유 기간</b> : 탈퇴 시 지체 없이 파기 (관련 법령에 따른 예외 보관 포함)</p>
+              </details>
+            </div>
+          </div>
+          <div class="consent-line">
+            <input type="checkbox" id="c_age" style="margin-top:3px">
+            <div><b>[필수] 만 14세 이상입니다</b></div>
+          </div>
+          <div class="consent-line">
+            <input type="checkbox" id="c_mkt_email" style="margin-top:3px">
+            <div><b>[선택] 광고성 정보 수신 동의(이메일)</b></div>
+          </div>
+          <div class="consent-line">
+            <input type="checkbox" id="c_mkt_sms" style="margin-top:3px">
+            <div><b>[선택] 광고성 정보 수신 동의(SMS)</b></div>
+          </div>
+          <div class="consent-line">
+            <input type="checkbox" id="c_xfer" style="margin-top:3px">
+            <div>
+              <b>[선택] 국외 이전 동의(해외 서버/3rd-party API 사용 시)</b>
+              <details class="hint-sm"><summary>상세 보기</summary>
+                <p>예: Google, OpenAI, AWS 등 해외 수탁사에 AI 처리 및 인프라 운영을 위탁할 수 있으며, 필요한 최소 정보만 전송합니다.</p>
+              </details>
+            </div>
+          </div>
+        </div>
+        <div id="cErr" class="error">[필수] 항목(이용약관/개인정보/만14세)을 모두 동의해 주세요.</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:10px">
+          <label class="hint-sm"><input type="checkbox" id="c_all"> 전체 동의</label>
+          <button id="s4next" class="btn primary">동의하고 가입</button>
+        </div>
+      </section>
+
+      <!-- step5 -->
+      <section id="st5" style="display:none">
+        <p><b>가입이 완료되었습니다.</b><br>Modemode.ai에 오신 걸 환영합니다. (데모)</p>
+        <button class="btn primary" id="toLogin" style="width:100%">로그인하러 가기</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== SPA 라우터 (뒤로가기 지원: hash 기반) ===== */
+const views = {
+  home: document.getElementById('view-home'),
+  characters: document.getElementById('view-characters'),
+  studio: document.getElementById('view-studio'),
+  models: document.getElementById('view-models')
+};
+function setActiveView(name){
+  Object.values(views).forEach(v=> v && v.classList.remove('active'));
+  if(views[name]) views[name].classList.add('active');
+  document.querySelectorAll('.nav-link').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.view === name);
+  });
+  window.scrollTo({top:0,behavior:'instant'});
+}
+function syncViewWithHash(){
+  const raw = (location.hash || '#home').replace('#','');
+  const name = views[raw] ? raw : 'home';
+  setActiveView(name);
+}
+document.querySelectorAll('[data-view]').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.preventDefault();
+    const target = btn.dataset.view;
+    location.hash = target;
+  });
+});
+document.querySelectorAll('[data-view-target]').forEach(btn=>{
+  btn.addEventListener('click', e=>{
+    e.preventDefault();
+    const target = btn.dataset.viewTarget;
+    location.hash = target;
+  });
+});
+window.addEventListener('hashchange', syncViewWithHash);
+syncViewWithHash();
+
+/* ===== 데이터셋 ===== */
+const CHARACTER_LIST = [
+  {
+    id: 'runway_hera',
+    name: '헤라 런웨이',
+    tag: '#하이패션/캠페인',
+    mood: '강렬·시크',
+    lang: 'ko',
+    role: 'news',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
+    highlight: '하이엔드 패션 브랜드 캠페인에 어울리는 런웨이 무드의 AI 모델입니다.'
+  },
+  {
+    id: 'lookbook_jisoo',
+    name: '지수 룩북',
+    tag: '#룩북/데일리',
+    mood: '도시·모던',
+    lang: 'ko',
+    role: 'commerce',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=400',
+    highlight: '온라인 스토어용 전신 룩북, 데일리 코디 소개에 최적화된 스타일입니다.'
+  },
+  {
+    id: 'street_minjun',
+    name: '민준 스트릿',
+    tag: '#스트릿/캐주얼',
+    mood: '자유롭고 쿨함',
+    lang: 'ko',
+    role: 'casual',
+    gender: 'm',
+    img: 'https://images.unsplash.com/photo-1520975918319-894d3c1a8d5e?w=400',
+    highlight: '스니커즈, 데님, 아우터 등 스트릿 룩과 라이프스타일 컨텐츠에 어울리는 모델입니다.'
+  },
+  {
+    id: 'studio_hana',
+    name: '하나 스튜디오',
+    tag: '#심플/스튜디오',
+    mood: '담백·단정',
+    lang: 'ko',
+    role: 'commerce',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=400',
+    highlight: '무지 배경에서 제품을 깔끔하게 보여주는 전신 스튜디오 모델입니다.'
+  },
+  {
+    id: 'sport_sena',
+    name: '세나 애슬레저',
+    tag: '#스포츠/애슬레저',
+    mood: '에너지·활동적',
+    lang: 'ko',
+    role: 'casual',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1544717305-996b815c338c?w=400',
+    highlight: '요가, 러닝, 헬스 등 액티브한 포즈가 많은 화보에 적합합니다.'
+  },
+  {
+    id: 'minimal_jiho',
+    name: '지호 미니멀',
+    tag: '#모던/오피스',
+    mood: '차분·세련',
+    lang: 'ko',
+    role: 'commerce',
+    gender: 'm',
+    img: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=400',
+    highlight: '셔츠, 수트 등 미니멀한 오피스룩·비즈니스룩 화보에 어울리는 모델입니다.'
+  },
+  {
+    id: 'street_harin',
+    name: '하린 스트릿',
+    tag: '#캐주얼/빈티지',
+    mood: '밝음·감각적',
+    lang: 'ko',
+    role: 'casual',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=400',
+    highlight: '빈티지하고 자연스러운 캐주얼 룩, Z세대 감성의 인스타그램 피드용 컷에 어울립니다.'
+  },
+  {
+    id: 'runway_taehyun',
+    name: '태현 런웨이',
+    tag: '#하이패션/남성',
+    mood: '강렬·모던',
+    lang: 'ko',
+    role: 'news',
+    gender: 'm',
+    img: 'https://images.unsplash.com/photo-1508214751196-bcfd4ca60f91?w=400',
+    highlight: '런웨이, 화보, 캠페인용으로 사용하기 좋은 남성 모델입니다.'
+  },
+  {
+    id: 'classic_yuna',
+    name: '유나 클래식',
+    tag: '#클래식/모던',
+    mood: '세련·고급',
+    lang: 'ko',
+    role: 'commerce',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=400',
+    highlight: '럭셔리 브랜드 룩북, 패션 매거진 화보에 어울리는 고급스러운 이미지입니다.'
+  },
+  {
+    id: 'global_luca',
+    name: 'Luca Global',
+    tag: '#Global/Runway',
+    mood: 'Sharp·Cool',
+    lang: 'en',
+    role: 'news',
+    gender: 'm',
+    img: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=400',
+    highlight: '해외 브랜드 캠페인과 글로벌 런웨이에 어울리는 AI 모델입니다.'
+  },
+  {
+    id: 'editorial_chloe',
+    name: 'Chloé Editorial',
+    tag: '#Editorial/Paris',
+    mood: 'Neutral·Elegant',
+    lang: 'en',
+    role: 'commerce',
+    gender: 'f',
+    img: 'https://images.unsplash.com/photo-1533577116850-9cc66cad8a9b?w=400',
+    highlight: '패션지, 광고 컷에 적합한 에디토리얼 무드의 글로벌 모델입니다.'
+  },
+  {
+    id: 'retro_jun',
+    name: '준 빈티지',
+    tag: '#레트로/클래식',
+    mood: '감성·자연스러움',
+    lang: 'ko',
+    role: 'casual',
+    gender: 'm',
+    img: 'https://images.unsplash.com/photo-1506084868230-bb9d95c24759?w=400',
+    highlight: '필름 감성, 빈티지 브랜드 룩북이나 오프라인 포스터에 어울립니다.'
+  }
+];
+
+const MODEL_NAMES = ["민정","지은","상진","주석","병진","상식","은서","지민","윤정","지수","태현","서윤","도윤","하린","예린"];
+const SIZE_ITEMS = [
+  {label:"ECU (Extreme Close-Up)", key:"ECU"},
+  {label:"CU (Close-Up)", key:"CU"},
+  {label:"BS (Bust Shot)", key:"BS"},
+  {label:"WS (Waist-up)", key:"WS"},
+  {label:"KS (Knee-up)", key:"KS"},
+  {label:"FS (Full Shot)", key:"FS"}
+];
+const POSE_ITEMS = ["서기","앉기","걷기","무릎꿇기","눕기","기대기","점프","턴(돌기)","손 주머니","팔짱 끼기","어깨 넘기기","바닥에 앉기"];
+const EMO_ITEMS  = ["밝음","차분","부드러움","자신감","시크","미소","진지","강렬","분노","슬픔","즐거움"];
+const ANGLE_ITEMS = [
+  {ko:"아이레벨", key:"eye"},
+  {ko:"하이 앵글", key:"high"},
+  {ko:"로우 앵글", key:"low"},
+  {ko:"정면",     key:"front"},
+  {ko:"측면",     key:"side"},
+  {ko:"오버숄더", key:"overShoulder"},
+  {ko:"탑뷰",     key:"top"},
+  {ko:"바닥샷",   key:"ground"},
+  {ko:"더치(틸트)",key:"dutch"}
+];
+const MOVE_GROUPS = {
+  linear:   ["Static","Dolly In","Dolly Out","Dolly Left","Dolly Right","Truck Left","Truck Right","Crane In","Crane Out"],
+  rotation: ["Pan Left","Pan Right","Tilt Up","Tilt Down","Roll CW","Roll CCW","Orbit CW","Orbit CCW"],
+  vertical: ["Pedestal Up","Pedestal Down","Crane Up","Crane Down"],
+  complex:  ["Zoom In","Zoom Out","Handheld","Steadicam","Rack Focus"]
+};
+
+/* ===== API 연동 (백엔드) ===== */
+/* 지금 만든 server.js 기준:
+   POST /api/generate-image
+   POST /api/generate-video
+*/
+const API_BASE = 'http://localhost:3000';
+const API = {
+  image: API_BASE + '/api/generate-image',
+  video: API_BASE + '/api/generate-video'
+};
+
+function toast(msg){
+  let el = document.getElementById('mlm-toast');
+  if(!el){
+    el = document.createElement('div');
+    el.id='mlm-toast';
+    el.style.position='fixed';
+    el.style.right='16px';
+    el.style.bottom='16px';
+    el.style.padding='10px 14px';
+    el.style.borderRadius='10px';
+    el.style.border='1px solid var(--bd)';
+    el.style.background='var(--panel)';
+    el.style.color='var(--ink)';
+    el.style.fontSize='12px';
+    el.style.zIndex='99999';
+    el.style.boxShadow='0 16px 40px rgba(0,0,0,.55)';
+    document.body.appendChild(el);
+  }
+  el.textContent = msg;
+  el.style.opacity='1';
+  el.style.display='block';
+  clearTimeout(el._timer);
+  el._timer = setTimeout(()=>{ el.style.opacity='0'; }, 2200);
+}
+
+/* ===== 캐릭터 카드 렌더링 ===== */
+function makeCharCard(char, small){
+  const div = document.createElement('article');
+  div.className = 'char-card';
+  div.dataset.id = char.id;
+  div.dataset.role = char.role;
+  div.dataset.lang = char.lang;
+  div.dataset.gender = char.gender;
+
+  const top = document.createElement('div');
+  top.className = 'char-top';
+
+  const av = document.createElement('div');
+  av.className = 'avatar ' + (char.role === 'news' ? 'badge-news' : (char.role==='casual' ? 'badge-soft' : ''));
+  av.textContent = char.name[0];
+  top.appendChild(av);
+
+  const meta = document.createElement('div');
+  meta.className = 'char-meta';
+  const nm = document.createElement('div');
+  nm.className = 'char-name';
+  nm.textContent = char.name;
+  const tag = document.createElement('span');
+  tag.style.fontSize = '11px';
+  tag.style.color = 'var(--muted)';
+  tag.textContent = char.tag;
+  nm.appendChild(tag);
+  const mood = document.createElement('div');
+  mood.className = 'char-tags';
+  mood.innerHTML = `<span>${char.mood}</span><span>· ${char.lang.toUpperCase()}</span>`;
+  meta.appendChild(nm);
+  meta.appendChild(mood);
+  top.appendChild(meta);
+  div.appendChild(top);
+
+  const body = document.createElement('div');
+  body.className = 'char-body';
+  body.textContent = char.highlight;
+  div.appendChild(body);
+
+  const act = document.createElement('div');
+  act.className = 'char-actions';
+  const play = document.createElement('button');
+  play.className = 'play-btn';
+  play.type = 'button';
+  play.title = '샘플 보기 (데모)';
+  play.addEventListener('click', ()=>{
+    alert('데모: "'+char.name+'" 캐릭터 샘플');
+  });
+  act.appendChild(play);
+
+  const right = document.createElement('div');
+  right.className = 'char-actions-right';
+  if(!small){
+    const chip = document.createElement('button');
+    chip.className = 'btn';
+    chip.style.padding='6px 10px';
+    chip.style.fontSize='11px';
+    chip.textContent = '즐겨찾기';
+    chip.addEventListener('click', ()=>{
+      alert('즐겨찾기에 추가 (데모)');
+    });
+    right.appendChild(chip);
+  }
+  const use = document.createElement('button');
+  use.className = 'btn primary';
+  use.style.padding='6px 10px';
+  use.style.fontSize='11px';
+  use.textContent = '스튜디오에서 사용';
+  use.addEventListener('click', ()=>{
+    document.getElementById('modelCurrent').textContent = char.name;
+    composePrompt();
+    location.hash = 'studio';
+  });
+  right.appendChild(use);
+
+  act.appendChild(right);
+  div.appendChild(act);
+  return div;
+}
+
+function renderCharSections(){
+  const grid = document.getElementById('charGrid');
+  const gridAll = document.getElementById('modelGridAll');
+  if(grid){
+    grid.innerHTML = '';
+    CHARACTER_LIST.slice(0,6).forEach(c => grid.appendChild(makeCharCard(c,true)));
+  }
+  if(gridAll){
+    gridAll.innerHTML = '';
+    CHARACTER_LIST.forEach(c => gridAll.appendChild(makeCharCard(c,false)));
+  }
+}
+renderCharSections();
+
+/* 캐릭터 필터/검색 (추천 페이지) */
+(function(){
+  const chips = document.querySelectorAll('[data-char-filter]');
+  const search = document.getElementById('charSearchInput');
+  function apply(){
+    const filter = document.querySelector('[data-char-filter].active')?.dataset.charFilter || 'all';
+    const q = (search?.value || '').trim().toLowerCase();
+    document.querySelectorAll('#charGrid .char-card').forEach(card=>{
+      const role = card.dataset.role;
+      const text = card.textContent.toLowerCase();
+      const okRole = (filter==='all') || (filter===role);
+      const okSearch = !q || text.includes(q);
+      card.style.display = (okRole && okSearch) ? '' : 'none';
+    });
+  }
+  chips.forEach(ch=>{
+    ch.addEventListener('click', ()=>{
+      chips.forEach(c=>c.classList.remove('active'));
+      ch.classList.add('active');
+      apply();
+    });
+  });
+  if(search) search.addEventListener('input', apply);
+})();
+
+/* 캐릭터 필터/검색 (전체 캐스팅 페이지) */
+(function(){
+  const search = document.getElementById('mdlSearchInput');
+  function apply(){
+    const langs   = Array.from(document.querySelectorAll('.mdl-filter-lang:checked')).map(el=>el.value);
+    const roles   = Array.from(document.querySelectorAll('.mdl-filter-role:checked')).map(el=>el.value);
+    const genders = Array.from(document.querySelectorAll('.mdl-filter-gender:checked')).map(el=>el.value);
+    const q = (search?.value || '').trim().toLowerCase();
+
+    document.querySelectorAll('#modelGridAll .char-card').forEach(card=>{
+      const lang = card.dataset.lang;
+      const role = card.dataset.role;
+      const gender = card.dataset.gender;
+      const text = card.textContent.toLowerCase();
+      const okLang   = !langs.length   || langs.includes(lang);
+      const okRole   = !roles.length   || roles.includes(role);
+      const okGender = !genders.length || genders.includes(gender);
+      const okSearch = !q || text.includes(q);
+      card.style.display = (okLang && okRole && okGender && okSearch) ? '' : 'none';
+    });
+  }
+  ['.mdl-filter-lang','.mdl-filter-role','.mdl-filter-gender'].forEach(cls=>{
+    document.querySelectorAll(cls).forEach(el=> el.addEventListener('change', apply));
+  });
+  if(search) search.addEventListener('input', apply);
+})();
+
+/* ===== 스튜디오: 메뉴 유틸 ===== */
+function wireMenu(triggerId, menuId, searchId, gridId, items, getLabel, onPick){
+  const btn = document.getElementById(triggerId);
+  const menu = document.getElementById(menuId);
+  const grid = document.getElementById(gridId);
+  const search = searchId ? document.getElementById(searchId) : null;
+  if(!btn || !menu || !grid) return;
+
+  function render(filter=""){
+    const list = typeof items === 'function' ? items() : items;
+    const filtered = filter
+      ? list.filter(x => (getLabel? getLabel(x): x).toLowerCase().includes(filter.toLowerCase()))
+      : list;
+    grid.innerHTML = "";
+    filtered.forEach(item=>{
+      const label = (getLabel? getLabel(item): item);
+      const d = document.createElement('div');
+      d.className = 'menu-item';
+      d.textContent = label;
+      const current = btn.querySelector('b')?.textContent || '';
+      if(current === label) d.classList.add('active');
+      d.addEventListener('click', ()=>{
+        onPick(item);
+        menu.classList.remove('show');
+      });
+      grid.appendChild(d);
+    });
+  }
+
+  btn.addEventListener('click', ()=>{
+    menu.classList.toggle('show');
+    if(menu.classList.contains('show')) render(search ? search.value : '');
+    if(search){ search.value=""; search.focus(); }
+  });
+  document.addEventListener('click', (e)=>{
+    if(!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('show');
+  });
+  if(search) search.addEventListener('input', e=> render(e.target.value));
+}
+
+/* 모델 메뉴 (이름 리스트) */
+(function(){
+  const btn = document.getElementById('modelMenuBtn');
+  const menu = document.getElementById('modelMenu');
+  const grid = document.getElementById('modelGridMenu');
+  const search = document.getElementById('modelSearch');
+  if(!btn || !menu || !grid) return;
+
+  function render(filter=""){
+    const list = MODEL_NAMES.filter(n => n.includes(filter));
+    grid.innerHTML = "";
+    list.forEach(name=>{
+      const d = document.createElement('div');
+      d.className = 'menu-item';
+      d.textContent = name;
+      if(document.getElementById('modelCurrent').textContent.trim() === name) d.classList.add('active');
+      d.addEventListener('click', ()=>{
+        document.getElementById('modelCurrent').textContent = name;
+        composePrompt();
+        menu.classList.remove('show');
+      });
+      grid.appendChild(d);
+    });
+  }
+  btn.addEventListener('click', ()=>{
+    menu.classList.toggle('show');
+    if(menu.classList.contains('show')){ render(""); if(search){ search.value=""; search.focus(); } }
+  });
+  document.addEventListener('click', (e)=>{
+    if(!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('show');
+  });
+  if(search) search.addEventListener('input', e=> render(e.target.value));
+
+  document.getElementById('favRow')?.addEventListener('click', e=>{
+    const chip = e.target.closest('.fav'); if(!chip) return;
+    document.querySelectorAll('.fav').forEach(f=>f.classList.remove('active'));
+    chip.classList.add('active');
+    document.getElementById('modelCurrent').textContent = chip.dataset.model;
+    composePrompt();
+  });
+})();
+
+/* 사이즈 / 포즈 / 감정 / 앵글 / 무빙 메뉴 */
+(function(){
+  // size
+  const sizeBtn  = document.getElementById('sizeMenuBtn');
+  const sizeMenu = document.getElementById('sizeMenu');
+  const sizeGrid = document.getElementById('sizeGrid');
+  if(sizeBtn && sizeMenu && sizeGrid){
+    sizeBtn.addEventListener('click', ()=>{
+      sizeMenu.classList.toggle('show');
+      if(!sizeMenu.classList.contains('show')) return;
+      sizeGrid.innerHTML = "";
+      SIZE_ITEMS.forEach(it=>{
+        const d = document.createElement('div');
+        d.className = 'menu-item';
+        d.textContent = it.label;
+        if(document.getElementById('sizeCurrent').textContent.includes(it.key)) d.classList.add('active');
+        d.addEventListener('click', ()=>{
+          document.getElementById('sizeCurrent').textContent = it.key + " (" + it.label.split('(')[1];
+          sizeMenu.classList.remove('show');
+          composePrompt();
+        });
+        sizeGrid.appendChild(d);
+      });
+    });
+    document.addEventListener('click', e=>{
+      if(!sizeMenu.contains(e.target) && !sizeBtn.contains(e.target)) sizeMenu.classList.remove('show');
+    });
+  }
+
+  // product
+  (function(){
+    const btn = document.getElementById('productMenuBtn');
+    const menu = document.getElementById('productMenu');
+    const img  = document.getElementById('productImage');
+    const thumb= document.getElementById('productThumb');
+    if(!btn || !menu) return;
+    btn.addEventListener('click', ()=> menu.classList.toggle('show'));
+    document.addEventListener('click', e=>{
+      if(!menu.contains(e.target) && !btn.contains(e.target)) menu.classList.remove('show');
+    });
+    if(img) img.addEventListener('change', e=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f){ thumb.textContent='IMAGE'; return; }
+      const url = URL.createObjectURL(f);
+      thumb.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">`;
+    });
+  })();
+
+  // pose
+  wireMenu('poseMenuBtn','poseMenu','poseSearch','poseGrid',POSE_ITEMS,null,(picked)=>{
+    document.getElementById('poseCurrent').textContent = picked;
+    composePrompt();
+  });
+  // emotion
+  wireMenu('emoMenuBtn','emoMenu','emoSearch','emoGrid',EMO_ITEMS,null,(picked)=>{
+    document.getElementById('emoCurrent').textContent = picked;
+    composePrompt();
+  });
+  // angle
+  wireMenu('angleMenuBtn','angleMenu','angleSearch','angleGrid',ANGLE_ITEMS,x=>x.ko,(picked)=>{
+    document.getElementById('angleCurrent').textContent = picked.ko;
+    renderAngleMini(picked.key);
+    composePrompt();
+  });
+  // move
+  function moveItems(){ 
+    const cat = document.querySelector('#moveCats .opt.active')?.dataset.cat || 'linear';
+    return MOVE_GROUPS[cat] || [];
+  }
+  wireMenu('moveMenuBtn','moveMenu',null,'moveGrid',moveItems,null,(picked)=>{
+    const label = typeof picked==='string' ? picked : picked.ko;
+    document.getElementById('moveCurrent').textContent = label;
+    const keyMap={
+      "Static":"static","Dolly In":"dollyIn","Dolly Out":"dollyOut","Dolly Left":"dollyLeft","Dolly Right":"dollyRight",
+      "Truck Left":"truckLeft","Truck Right":"truckRight","Pan Left":"panLeft","Pan Right":"panRight",
+      "Tilt Up":"tilt up","Tilt Down":"tilt down","Zoom In":"zoom in","Zoom Out":"zoom out",
+      "Pedestal Up":"pedestal up","Pedestal Down":"pedestal down","Roll CW":"rollCW","Roll CCW":"rollCCW",
+      "Orbit CW":"orbitCW","Orbit CCW":"orbitCCW","Crane Up":"craneUp","Crane Down":"craneDown","Crane In":"craneIn","Crane Out":"craneOut",
+      "Handheld":"handheld","Steadicam":"steadicam","Rack Focus":"rackFocus"
+    };
+    renderMoveMini(keyMap[label] || 'static');
+    composePrompt();
+  });
+  document.querySelectorAll('#moveCats .opt').forEach(opt=>{
+    opt.addEventListener('click', ()=>{
+      document.querySelectorAll('#moveCats .opt').forEach(o=>o.classList.remove('active'));
+      opt.classList.add('active');
+    });
+  });
+})();
+
+/* 앵글/무빙 미니 SVG */
+function renderAngleMini(key){
+  const target = document.getElementById('angleMini');
+  const file   = document.getElementById('angleImage');
+  if(!target) return;
+  if(target.dataset.hasImage==='1') return;
+  const W=360,H=110;
+  const svg=[`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">`,
+  `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="var(--preview)"/>`,
+  `<line x1="10" y1="${H-18}" x2="${W-10}" y2="${H-18}" stroke="var(--bd)" stroke-width="2"/>`,
+  `<circle cx="${W/2}" cy="${H-38}" r="18" fill="var(--panel)"/>`];
+  function cam(x,y,rot){ svg.push(`<g transform="translate(${x},${y}) rotate(${rot||0})">
+    <rect x="-12" y="-7" width="24" height="14" rx="3" fill="#ff7a21"/>
+    <rect x="8" y="-4" width="8" height="8" rx="2" fill="#ff9550"/></g>`); }
+  function ray(x1,y1,x2,y2){ svg.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ff9550" stroke-width="2" stroke-dasharray="4 3"/>`); }
+  const sx=W/2, sy=H-38;
+  switch(key){
+    case 'eye': cam(sx-110, sy, 0); ray(sx-90,sy,sx-10,sy); break;
+    case 'high': cam(sx-110, sy-36, -10); ray(sx-90,sy-36,sx-10,sy-6); break;
+    case 'low': cam(sx-110, sy+28, 10); ray(sx-90,sy+28,sx-10,sy+4); break;
+    case 'front': cam(sx-120, sy-4, 0); ray(sx-98,sy-4,sx-10,sy-4); break;
+    case 'side': cam(sx-140, sy-4, 0); ray(sx-120,sy-4,sx-30,sy-4); break;
+    case 'overShoulder': cam(sx-70, sy-18, 0); ray(sx-50,sy-18,sx+10,sy-10); break;
+    case 'top': cam(sx-10, sy-90, 90); ray(sx,sy-70,sx,sy-10); break;
+    case 'ground': cam(sx-110, H-16, 0); ray(sx-90,H-16,sx-10,sy+16); break;
+    case 'dutch': cam(sx-110, sy-4, -18); ray(sx-94,sy-10,sx-10,sy-4); break;
+  }
+  svg.push(`</svg>`);
+  target.innerHTML = svg.join('');
+  if(file){
+    file.addEventListener('change', e=>{
+      const f = e.target.files && e.target.files[0];
+      if(!f){ target.dataset.hasImage='0'; renderAngleMini('eye'); return; }
+      const url = URL.createObjectURL(f);
+      target.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:8px">`;
+      target.dataset.hasImage='1';
+    }, {once:true});
+  }
+}
+function renderMoveMini(key){
+  const target = document.getElementById('moveMini');
+  if(!target) return;
+  const W=360,H=90,cx=W/2,cy=H/2;
+  const svg=[`<svg viewBox="0 0 ${W} ${H}" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">`,
+  `<rect x="0" y="0" width="${W}" height="${H}" rx="10" fill="var(--preview)"/>`,
+  `<rect x="${cx-14}" y="${cy-14}" width="28" height="28" rx="6" fill="var(--panel)"/>`];
+  function arrow(x1,y1,x2,y2){ svg.push(`<line x1="${x1}" y1="${y1}" x2="${x2}" y2="${y2}" stroke="#ff9550" stroke-width="2" stroke-dasharray="4 3"/>`); }
+  switch(key){
+    case 'static': break;
+    case 'dollyIn': arrow(40,cy,cx-18,cy); break;
+    case 'dollyOut': arrow(cx-18,cy,40,cy); break;
+    case 'dollyLeft': arrow(cx-50,cy,cx-18,cy); break;
+    case 'dollyRight': arrow(cx+18,cy,cx+50,cy); break;
+    case 'truckLeft': arrow(cx+70,cy,cx-70,cy); break;
+    case 'truckRight': arrow(cx-70,cy,cx+70,cy); break;
+    case 'panLeft': arrow(cx+60,cy-18,cx-60,cy-18); break;
+    case 'panRight': arrow(cx-60,cy-18,cx+60,cy-18); break;
+    case 'tiltUp': arrow(cx,cy+24,cx,cy-24); break;
+    case 'tiltDown': arrow(cx,cy-24,cx,cy+24); break;
+    case 'zoomIn': arrow(cx-80,cy,cx-22,cy); arrow(cx+80,cy,cx+22,cy); break;
+    case 'zoomOut': arrow(cx-22,cy,cx-80,cy); arrow(cx+22,cy,cx+80,cy); break;
+    case 'pedestalUp': arrow(cx,cy+32,cx,cy-6); break;
+    case 'pedestalDown': arrow(cx,cy-32,cx,cy+6); break;
+    case 'rollCW':
+    case 'rollCCW': svg.push(`<circle cx="${cx}" cy="${cy}" r="28" fill="none" stroke="#ff9550" stroke-width="2" stroke-dasharray="4 4"/>`); break;
+    case 'orbitCW':
+    case 'orbitCCW': svg.push(`<circle cx="${cx}" cy="${cy}" r="40" fill="none" stroke="#ff9550" stroke-width="2" stroke-dasharray="4 4"/>`); break;
+    case 'craneUp': arrow(cx-60,cy+18,cx-60,cy-18); break;
+    case 'craneDown': arrow(cx-60,cy-18,cx-60,cy+18); break;
+    case 'craneIn': arrow(cx-80,cy+18,cx-52,cy+18); break;
+    case 'craneOut': arrow(cx-52,cy+18,cx-80,cy+18); break;
+    case 'handheld': arrow(cx-40,cy-8,cx+40,cy+8); break;
+    case 'steadicam': arrow(cx-60,cy,cx+60,cy); break;
+    case 'rackFocus': arrow(cx-50,cy-6,cx-20,cy-6); arrow(cx+20,cy+6,cx+50,cy+6); break;
+  }
+  svg.push(`</svg>`);
+  target.innerHTML = svg.join('');
+}
+renderAngleMini('eye');
+renderMoveMini('static');
+
+/* 프롬프트 합성 */
+function sizePhrase(){
+  const t = (document.getElementById('sizeCurrent').textContent || '').trim();
+  if(t.startsWith('ECU')) return 'extreme close-up';
+  if(t.startsWith('CU'))  return 'close-up';
+  if(t.startsWith('BS'))  return 'bust shot';
+  if(t.startsWith('WS'))  return 'waist-up shot';
+  if(t.startsWith('KS'))  return 'knee-up shot';
+  if(t.startsWith('FS'))  return 'full-body shot';
+  return t;
+}
+function composePrompt(){
+  const modelKo = document.getElementById('modelCurrent').textContent.trim() || '민정';
+  const size = sizePhrase();
+  const poseKo = document.getElementById('poseCurrent').textContent.trim() || '서기';
+  const poseMap = { '서기':'standing pose','앉기':'sitting pose','걷기':'walking pose','무릎꿇기':'kneeling','눕기':'lying down','기대기':'leaning pose','점프':'jumping pose','턴(돌기)':'turning pose','손 주머니':'hands in pockets','팔짱 끼기':'arms crossed','어깨 넘기기':'over-shoulder pose','바닥에 앉기':'sitting on the floor' };
+  const pose = poseMap[poseKo] || 'standing pose';
+
+  const emoKo = document.getElementById('emoCurrent').textContent.trim() || '밝음';
+  const emoMap = { '밝음':'bright','차분':'calm','부드러움':'soft','자신감':'confident','시크':'chic','미소':'smiling','진지':'serious','강렬':'intense','분노':'angry','슬픔':'sad','즐거움':'joyful' };
+  const emo = emoMap[emoKo] || 'bright';
+
+  const angleKo = document.getElementById('angleCurrent').textContent.trim() || '아이레벨';
+  const angleKeyMap = { '아이레벨':'eye','하이 앵글':'high','로우 앵글':'low','정면':'front','측면':'side','오버숄더':'overShoulder','탑뷰':'top','바닥샷':'ground','더치(틸트)':'dutch' };
+  const angleKey = angleKeyMap[angleKo] || 'eye';
+  const angleMap = {eye:'eye-level',high:'high-angle',low:'low-angle',front:'front view',side:'side view',overShoulder:'over-shoulder view',top:'top view from above',ground:'ground-level view',dutch:'dutch tilt shot'};
+  const angle = angleMap[angleKey];
+
+  const moveKo = document.getElementById('moveCurrent').textContent.trim() || 'Static';
+  const moveKeyMap = { 'Static':'static','Dolly In':'dolly in','Dolly Out':'dolly out','Dolly Left':'dolly left','Dolly Right':'dolly right','Truck Left':'truck left','Truck Right':'truck right','Pan Left':'pan left','Pan Right':'pan right','Tilt Up':'tilt up','Tilt Down':'tilt down','Zoom In':'zoom in','Zoom Out':'zoom out','Pedestal Up':'pedestal up','Pedestal Down':'pedestal down','Roll CW':'roll clockwise','Roll CCW':'roll counter-clockwise','Orbit CW':'orbit clockwise','Orbit CCW':'orbit counter-clockwise','Crane Up':'crane up','Crane Down':'crane down','Crane In':'crane in','Crane Out':'crane out','Handheld':'handheld camera','Steadicam':'steadicam shot','Rack Focus':'rack focus'};
+  const move = moveKeyMap[moveKo] || 'static camera';
+
+  const productDesc = (document.getElementById('productDesc')?.value || '').trim();
+  const extra = (document.getElementById('extraDesc')?.value || '').trim();
+
+  const parts = [
+    `${modelKo} style AI fashion model`,
+    size,
+    pose,
+    `${emo} expression`,
+    angle,
+    move,
+    productDesc ? `wearing ${productDesc}` : '',
+    extra
+  ].filter(Boolean);
+  document.getElementById('promptOutput').textContent = parts.join(', ');
+}
+document.querySelectorAll('#view-studio input').forEach(el=>{
+  if(el.id === 'promptInput') return;
+  el.addEventListener('input', composePrompt);
+});
+composePrompt();
+
+/* 프롬프트 인풋 + 음성 */
+(function(){
+  const promptInput = document.getElementById('promptInput');
+  const promptEnter = document.getElementById('promptEnter');
+  const promptMic   = document.getElementById('promptMic');
+  function applyPromptInput(){
+    const v = (promptInput?.value || '').trim();
+    if(!v) return;
+    const extra = document.getElementById('extraDesc');
+    if(extra){
+      extra.value = extra.value ? (extra.value + ', ' + v) : v;
+      composePrompt();
+    }
+    promptInput.value='';
+  }
+  if(promptEnter) promptEnter.addEventListener('click', applyPromptInput);
+  if(promptInput) promptInput.addEventListener('keydown', e=>{
+    if(e.key==='Enter'){ e.preventDefault(); applyPromptInput(); }
+  });
+
+  let recognition, recActive=false;
+  function startVoice(){
+    const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if(!SR){ alert('현재 브라우저에서는 음성 인식이 지원되지 않습니다. Chrome 계열을 권장합니다.'); return; }
+    recognition = new SR();
+    recognition.lang='ko-KR';
+    recognition.interimResults=false;
+    recognition.maxAlternatives=1;
+    recognition.onresult = ev=>{
+      const text = ev.results[0][0].transcript;
+      if(promptInput) promptInput.value = (promptInput.value ? promptInput.value + ' ' : '') + text;
+    };
+    recognition.onend = ()=>{ recActive=false; promptMic?.classList.remove('on'); };
+    recognition.onerror= ()=>{ recActive=false; promptMic?.classList.remove('on'); };
+    recActive=true;
+    promptMic?.classList.add('on');
+    recognition.start();
+  }
+  if(promptMic) promptMic.addEventListener('click', ()=>{
+    if(recognition && recActive){ recognition.stop(); return; }
+    startVoice();
+  });
+
+  document.getElementById('togglePrompt')?.addEventListener('click', ()=>{
+    const code = document.getElementById('promptOutput');
+    code.style.display = (code.style.display === 'none') ? 'block' : 'none';
+  });
+})();
+
+/* ===== 로그인/회원가입 모달 ===== */
+function openModal(id){ document.getElementById(id)?.classList.add('show'); }
+function closeModal(id){ document.getElementById(id)?.classList.remove('show'); }
+document.querySelectorAll('[data-close]').forEach(btn=>{
+  btn.addEventListener('click', e=> closeModal(e.currentTarget.dataset.close));
+});
+document.querySelectorAll('.modal-backdrop').forEach(b=>{
+  b.addEventListener('click', e=> closeModal(e.currentTarget.getAttribute('data-close')));
+});
+document.getElementById('loginBtnTop')?.addEventListener('click', ()=> openModal('loginModal'));
+document.getElementById('signupBtnTop')?.addEventListener('click', ()=> openModal('signupModal'));
+document.getElementById('openSignupFromLogin')?.addEventListener('click', e=>{
+  e.preventDefault(); closeModal('loginModal'); openModal('signupModal');
+});
+
+/* 로그인 + 마이페이지 (데모: 서버 없이 localStorage만 사용) */
+(function(){
+  const KEY='mlm_auth';
+  function setAuth(obj){ localStorage.setItem(KEY, JSON.stringify(obj||{})); }
+  function getAuth(){ try{ return JSON.parse(localStorage.getItem(KEY)||'{}'); }catch(e){ return {}; } }
+  function clearAuth(){ localStorage.removeItem(KEY); }
+
+  const loginSubmit = document.getElementById('loginSubmit');
+  if(loginSubmit){
+    loginSubmit.addEventListener('click', async ()=>{
+      const em = document.getElementById('loginEmail').value.trim();
+      const pw = document.getElementById('loginPw').value;
+      const okEm = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+      document.getElementById('loginEmailErr').classList.toggle('show', !okEm);
+      document.getElementById('loginPwErr').classList.toggle('show', pw.length<1);
+      if(!okEm || pw.length<1) return;
+
+      // 서버 호출 없이 로컬에서만 처리
+      try{
+        toast('로그인 중... (데모)');
+        setAuth({
+          email: em,
+          name:  em.split('@')[0],
+          token: ''
+        });
+        closeModal('loginModal');
+        ensureMyPageUI();
+        toast('로그인 완료 (데모)');
+      }catch(err){
+        console.error(err);
+        toast('로그인 처리 중 오류가 발생했습니다.');
+      }
+    });
+  }
+
+  function ensureMyPageUI(){
+    const topbar = document.querySelector('.topbar-inner');
+    if(!topbar) return;
+    if(topbar.querySelector('.mypage')) return;
+    const auth = getAuth();
+    if(!auth.email) return;
+
+    const loginBtn = document.getElementById('loginBtnTop');
+    const signupBtn= document.getElementById('signupBtnTop');
+    if(loginBtn) loginBtn.style.display='none';
+    if(signupBtn) signupBtn.style.display='none';
+
+    const wrap = document.createElement('div');
+    wrap.className='mypage';
+    wrap.innerHTML = `
+      <button class="mypage-btn" id="mypageBtn">
+        <span class="mypage-avatar"></span>
+        <span id="mypageName">${auth.name || 'User'}</span>
+      </button>
+      <div class="mypage-menu" id="mypageMenu">
+        <a href="#" id="goProfile">프로필</a>
+        <a href="#" id="goBilling">구독/결제</a>
+        <a href="#" id="goProjects">내 프로젝트</a>
+        <a href="#" id="doLogout">로그아웃</a>
+      </div>`;
+    document.querySelector('.topbar-right').insertBefore(wrap, document.querySelector('.themebtn'));
+
+    const btn = wrap.querySelector('#mypageBtn');
+    btn.addEventListener('click', ()=> wrap.classList.toggle('open'));
+    document.addEventListener('click', e=>{
+      if(!wrap.contains(e.target)) wrap.classList.remove('open');
+    });
+    wrap.querySelector('#doLogout').addEventListener('click', e=>{
+      e.preventDefault();
+      clearAuth();
+      location.reload();
+    });
+    wrap.querySelector('#goProfile').addEventListener('click', e=>{ e.preventDefault(); alert('데모: 프로필 페이지로 이동'); });
+    wrap.querySelector('#goBilling').addEventListener('click', e=>{ e.preventDefault(); alert('데모: 구독/결제 페이지로 이동'); });
+    wrap.querySelector('#goProjects').addEventListener('click', e=>{ e.preventDefault(); alert('데모: 내 프로젝트로 이동'); });
+  }
+  if(getAuth().email) ensureMyPageUI();
+})();
+
+/* 회원가입 step 흐름 (데모: 서버 없이 동작) */
+(function(){
+  const tabs = document.querySelectorAll('#signupModal .tab');
+  function setStep(n){
+    ['st1','st2','st3','st4','st5'].forEach((id,idx)=>{
+      const el = document.getElementById(id);
+      if(el) el.style.display = (idx===n-1)?'block':'none';
+    });
+    tabs.forEach(t=> t.classList.toggle('on', Number(t.dataset.step)===n));
+  }
+  setStep(1);
+
+  document.getElementById('s1next')?.addEventListener('click', ()=>{
+    const nm = document.getElementById('s1name').value.trim();
+    const em = document.getElementById('s1e').value.trim();
+    const ok = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(em);
+    document.getElementById('s1nameErr').classList.toggle('show', !nm);
+    document.getElementById('s1err').classList.toggle('show', !ok);
+    if(nm && ok) setStep(2);
+  });
+  document.getElementById('s2next')?.addEventListener('click', ()=>{
+    const cd = document.getElementById('s2c').value.trim();
+    const ok = /^\d{6}$/.test(cd); // 임시 정책: 6자리 숫자면 OK
+    document.getElementById('s2err').classList.toggle('show', !ok);
+    if(ok) setStep(3);
+  });
+  document.getElementById('s2resend')?.addEventListener('click', e=>{
+    e.preventDefault();
+    alert('인증코드 재전송 (데모)');
+  });
+  function pwPolicy(s){
+    const rules=[/[A-Z]/,/[a-z]/,/\d/,/[^A-Za-z0-9]/]; let c=0; rules.forEach(r=>{ if(r.test(s)) c++; });
+    return s.length>=8 && c>=3;
+  }
+  document.getElementById('s3next')?.addEventListener('click', ()=>{
+    const p1=document.getElementById('s3p1').value;
+    const p2=document.getElementById('s3p2').value;
+    const ok = pwPolicy(p1) && p1===p2;
+    document.getElementById('s3err').classList.toggle('show', !ok);
+    if(ok) setStep(4);
+  });
+  const need=['c_tos','c_privacy','c_age'];
+  document.getElementById('c_all')?.addEventListener('change', e=>{
+    ['c_tos','c_privacy','c_age','c_mkt_email','c_mkt_sms','c_xfer'].forEach(id=>{
+      const el=document.getElementById(id); if(el) el.checked = e.target.checked;
+    });
+  });
+  document.getElementById('s4next')?.addEventListener('click', async ()=>{
+    const missing = need.some(id=> !document.getElementById(id).checked);
+    document.getElementById('cErr').classList.toggle('show', missing);
+    if(missing){
+      toast('필수 동의 항목을 확인해 주세요.');
+      return;
+    }
+
+    const name  = document.getElementById('s1name').value.trim();
+    const email = document.getElementById('s1e').value.trim();
+    const pw    = document.getElementById('s3p1').value;
+    if(!name || !email || !pw){
+      toast('이름/이메일/비밀번호를 다시 확인해 주세요.');
+      return;
+    }
+
+    // 여기서는 서버 호출 없이 바로 완료 단계로 이동 (데모)
+    setStep(5);
+    const loginEmail = document.getElementById('loginEmail');
+    if(loginEmail) loginEmail.value = email;
+    toast('회원가입 완료! (데모)');
+  });
+  document.getElementById('toLogin')?.addEventListener('click', ()=>{
+    closeModal('signupModal'); openModal('loginModal');
+  });
+})();
+
+/* “전체 캐릭터에서 고르기”에서 스튜디오로 돌아가기 버튼 */
+document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', e=>{
+  e.preventDefault(); location.hash = 'studio';
+});
+
+/* ===== 프리뷰: AI 이미지 & 영상 생성 API 연동 (server.js와 맞춤) ===== */
+(function(){
+  const previewBox = document.getElementById('previewBox');
+  const promptCode = document.getElementById('promptOutput');
+  if(!previewBox || !promptCode) return;
+
+  const bar = document.createElement('div');
+  bar.style.display='flex';
+  bar.style.gap='8px';
+  bar.style.margin='4px 0 10px';
+  bar.style.flexWrap='wrap';
+
+  const imgBtn = document.createElement('button');
+  imgBtn.className='btn';
+  imgBtn.style.fontSize='12px';
+  imgBtn.textContent='AI 이미지 생성';
+
+  const vidBtn = document.createElement('button');
+  vidBtn.className='btn soft';
+  vidBtn.style.fontSize='12px';
+  vidBtn.textContent='이미지로 영상 만들기';
+
+  bar.appendChild(imgBtn);
+  bar.appendChild(vidBtn);
+  previewBox.insertAdjacentElement('afterend', bar);
+
+  // 최근 생성 이미지 (영상 생성용)
+  let lastImages = [];
+
+  // 이미지 생성: POST /api/generate-image  (server.js 기준)
+  imgBtn.addEventListener('click', async ()=>{
+    const prompt = (promptCode.textContent || '').trim();
+    if(!prompt){
+      toast('프롬프트가 비어 있습니다. 스튜디오에서 옵션을 먼저 선택해 주세요.');
+      return;
+    }
+    toast('이미지 생성 중...');
+
+    try{
+      const r = await fetch(API.image,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({prompt})
+      });
+      const data = await r.json().catch(()=>null);
+      if(!r.ok || !data || data.ok === false){
+        toast(data?.error || '이미지 생성에 실패했습니다.');
+        return;
+      }
+      const url = data.imageUrl || (Array.isArray(data.images) ? data.images[0] : '');
+      if(!url){
+        toast('이미지 URL이 응답에 없습니다.');
+        return;
+      }
+      lastImages = Array.isArray(data.images) && data.images.length ? data.images : [url];
+
+      previewBox.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px">`;
+      toast('이미지 생성 완료');
+    }catch(err){
+      console.error(err);
+      toast('서버 오류로 이미지 생성에 실패했습니다.');
+    }
+  });
+
+  // 영상 생성: POST /api/generate-video (server.js 기준, JSON으로 videoUrl 반환)
+  vidBtn.addEventListener('click', async ()=>{
+    if(!lastImages.length){
+      toast('먼저 이미지를 생성해 주세요.');
+      return;
+    }
+    toast('영상 생성 중...');
+
+    try{
+      const r = await fetch(API.video,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({images:lastImages})
+      });
+      const data = await r.json().catch(()=>null);
+      if(!r.ok || !data || data.ok === false || !data.videoUrl){
+        toast(data?.error || '영상 생성에 실패했습니다.');
+        return;
+      }
+      const url = data.videoUrl;
+      previewBox.innerHTML = '';
+      const vid = document.createElement('video');
+      vid.controls = true;
+      vid.autoplay = true;
+      vid.style.maxWidth='100%';
+      vid.style.maxHeight='100%';
+      vid.style.borderRadius='12px';
+      vid.src = url;
+      previewBox.appendChild(vid);
+      toast('영상 생성 완료');
+    }catch(err){
+      console.error(err);
+      toast('서버 오류로 영상 생성에 실패했습니다.');
+    }
+  });
+})();
+</script>
+</body>
+</html>
