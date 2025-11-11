@@ -1146,15 +1146,10 @@ const MOVE_GROUPS = {
 };
 
 /* ===== API 연동 (백엔드) ===== */
-/* 지금 만든 server.js 기준:
-   POST /api/generate-image
-   POST /api/generate-video
+/* server.js 기준:
+   POST /api/gemini-image
+   POST /api/video-from-images
 */
-const API_BASE = 'http://localhost:3000';
-const API = {
-  image: API_BASE + '/api/generate-image',
-  video: API_BASE + '/api/generate-video'
-};
 
 function toast(msg){
   let el = document.getElementById('mlm-toast');
@@ -1857,7 +1852,7 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
   e.preventDefault(); location.hash = 'studio';
 });
 
-/* ===== 프리뷰: AI 이미지 & 영상 생성 API 연동 (server.js와 맞춤) ===== */
+/* ===== 프리뷰: AI 이미지 & 영상 생성 API 연동 ===== */
 (function(){
   const previewBox = document.getElementById('previewBox');
   const promptCode = document.getElementById('promptOutput');
@@ -1886,7 +1881,7 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
   // 최근 생성 이미지 (영상 생성용)
   let lastImages = [];
 
-  // 이미지 생성: POST /api/generate-image  (server.js 기준)
+  // 이미지 생성: POST /api/gemini-image
   imgBtn.addEventListener('click', async ()=>{
     const prompt = (promptCode.textContent || '').trim();
     if(!prompt){
@@ -1896,22 +1891,23 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
     toast('이미지 생성 중...');
 
     try{
-      const r = await fetch(API.image,{
+      const r = await fetch(npm install node-fetchAPI.image,{
         method:'POST',
         headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({prompt})
+        body:JSON.stringify({prompt, count:4})
       });
       const data = await r.json().catch(()=>null);
-      if(!r.ok || !data || data.ok === false){
+      if(!r.ok || !data){
         toast(data?.error || '이미지 생성에 실패했습니다.');
         return;
       }
-      const url = data.imageUrl || (Array.isArray(data.images) ? data.images[0] : '');
+      const images = Array.isArray(data.images) ? data.images : [];
+      const url = images[0] || data.imageUrl;
       if(!url){
         toast('이미지 URL이 응답에 없습니다.');
         return;
       }
-      lastImages = Array.isArray(data.images) && data.images.length ? data.images : [url];
+      lastImages = images.length ? images : [url];
 
       previewBox.innerHTML = `<img src="${url}" style="max-width:100%;max-height:100%;object-fit:contain;border-radius:12px">`;
       toast('이미지 생성 완료');
@@ -1921,13 +1917,13 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
     }
   });
 
-  // 영상 생성: POST /api/generate-video (server.js 기준, JSON으로 videoUrl 반환)
+  // 영상 생성: POST /api/video-from-images
   vidBtn.addEventListener('click', async ()=>{
     if(!lastImages.length){
       toast('먼저 이미지를 생성해 주세요.');
       return;
     }
-    toast('영상 생성 중...');
+    toast('영상 생성 중... (데모)');
 
     try{
       const r = await fetch(API.video,{
@@ -1935,8 +1931,27 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({images:lastImages})
       });
+
+      // server.js에서 바로 바이너리(mp4) 응답하는 경우 데모로 blob 처리
+      if(r.ok && r.headers.get('Content-Type')?.includes('video')){
+        const blob = await r.blob();
+        const url = URL.createObjectURL(blob);
+        previewBox.innerHTML = '';
+        const vid = document.createElement('video');
+        vid.controls = true;
+        vid.autoplay = true;
+        vid.style.maxWidth='100%';
+        vid.style.maxHeight='100%';
+        vid.style.borderRadius='12px';
+        vid.src = url;
+        previewBox.appendChild(vid);
+        toast('영상 생성 완료 (데모)');
+        return;
+      }
+
+      // JSON 응답 형식인 경우 (videoUrl)
       const data = await r.json().catch(()=>null);
-      if(!r.ok || !data || data.ok === false || !data.videoUrl){
+      if(!r.ok || !data || !data.videoUrl){
         toast(data?.error || '영상 생성에 실패했습니다.');
         return;
       }
@@ -1956,19 +1971,7 @@ document.getElementById('btnBackToStudioFromModels')?.addEventListener('click', 
       toast('서버 오류로 영상 생성에 실패했습니다.');
     }
   });
-})();<script>
-const BACKEND_BASE = 'https://modemode-ai.onrender.com';
-
-// ✅ API 연결 테스트용 함수
-async function testApiConnection() {
-  const res = await fetch(`${BACKEND_BASE}/api/gemini-image`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ prompt: "테스트 이미지", count: 2 })
-  });
-  const data = await res.json();
-  alert(`서버 연결 성공!\n이미지 개수: ${data.images?.length || 0}`);
-}
+})();
 </script>
 </body>
 </html>

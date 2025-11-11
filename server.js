@@ -1,135 +1,97 @@
-// server.js  (modemode.ai API + 정적 HTML 서버)
-
+// server.js
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
 
+// 🔐 Render 환경변수에서 GEMINI_API_KEY 읽기 (없어도 동작은 함)
+const GEMINI_API_KEY = process.env.GEMINI_API_KEY || '';
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-// 미들웨어 설정
 app.use(cors());
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+app.use(express.json({ limit: '2mb' }));
 
-// ======================
-// 1. 정적 파일 (index.html) 서빙
-// ======================
-// 현재 폴더(__dirname)에 있는 파일들을 그대로 서비스
+// 요청 로그 출력 (어떤 API가 불렸는지 보기 쉽게)
+app.use((req, res, next) => {
+  console.log(`[${new Date().toISOString()}] ${req.method} ${req.url}`);
+  next();
+});
+
+// 서버 시작 시 로그로 상태 출력
+if (!GEMINI_API_KEY) {
+  console.log('⚠️ GEMINI_API_KEY가 설정되어 있지 않습니다. (지금은 플레이스홀더 이미지 사용)');
+} else {
+  console.log('✅ GEMINI_API_KEY가 설정되었습니다.');
+}
+
+// ===============================
+// 헬스체크 (Render용 상태 확인)
+// ===============================
+app.get('/api/health', (req, res) => {
+  res.json({
+    ok: true,
+    message: 'modemode.ai API server is running 🚀',
+    hasGeminiKey: !!GEMINI_API_KEY
+  });
+});
+
+// ===============================
+// 🧠 이미지 생성 API
+// ===============================
+app.post('/api/gemini-image', async (req, res) => {
+  try {
+    const { prompt, count } = req.body || {};
+    if (!prompt) {
+      return res.status(400).json({ ok: false, msg: 'prompt가 없습니다.' });
+    }
+
+    const safeCount = Math.min(Number(count) || 4, 4);
+    const images = Array.from({ length: safeCount }).map((_, i) => {
+      const seed = encodeURIComponent(`${prompt}-${i}-${Date.now()}`);
+      return `https://picsum.photos/seed/${seed}/800/1200`;
+    });
+
+    res.json({ ok: true, images });
+  } catch (err) {
+    console.error('❌ /api/gemini-image error', err);
+    res.status(500).json({ ok: false, msg: '서버 오류로 이미지 생성 실패' });
+  }
+});
+
+// ===============================
+// 🎬 영상 생성 API
+// ===============================
+app.post('/api/video-from-images', async (req, res) => {
+  try {
+    const { images } = req.body || {};
+    if (!Array.isArray(images) || images.length === 0) {
+      return res.status(400).json({ ok: false, msg: 'images 배열이 없습니다.' });
+    }
+
+    // 샘플 비디오 URL (나중에 AI 영상 합성으로 교체 가능)
+    const videoUrl = 'https://sample-videos.com/video321/mp4/720/big_buck_bunny_720p_1mb.mp4';
+
+    res.json({ ok: true, videoUrl });
+  } catch (err) {
+    console.error('❌ /api/video-from-images error', err);
+    res.status(500).json({ ok: false, msg: '서버 오류로 영상 생성 실패' });
+  }
+});
+
+// ===============================
+// 🖥 정적 파일 서빙 (index.html 포함)
+// ===============================
 app.use(express.static(path.join(__dirname)));
 
-// 기본 페이지: / -> index.html
-app.get('/', (req, res) => {
+// SPA 라우팅 대응 (직접 /studio 같은 주소로 접근 시 index.html 반환)
+app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, 'index.html'));
 });
 
-// ======================
-// 2. 아주 간단한 "가짜" 유저 DB (메모리 저장)
-// ======================
-const users = []; // 서버 껐다 켜면 초기화되는 임시 저장소
-
-// ======================
-// 3. 회원가입 API
-//     POST /api/auth/signup
-// ======================
-app.post('/api/auth/signup', (req, res) => {
-  const { name, email, password, marketing_email, marketing_sms, xfer_agree } = req.body || {};
-
-  if (!name || !email || !password) {
-    return res.status(400).json({ ok: false, msg: '이름/이메일/비밀번호가 필요합니다.' });
-  }
-
-  const exists = users.find(u => u.email === email);
-  if (exists) {
-    return res.status(400).json({ ok: false, msg: '이미 가입된 이메일입니다.' });
-  }
-
-  users.push({
-    name,
-    email,
-    password,           // 실제 서비스면 암호화해야 하지만, 지금은 데모라 그냥 저장
-    marketing_email: !!marketing_email,
-    marketing_sms: !!marketing_sms,
-    xfer_agree: !!xfer_agree,
-  });
-
-  console.log('[SIGNUP]', email);
-  return res.json({ ok: true, email, name });
-});
-
-// ======================
-// 4. 로그인 API
-//     POST /api/auth/login
-// ======================
-app.post('/api/auth/login', (req, res) => {
-  const { email, password } = req.body || {};
-
-  if (!email || !password) {
-    return res.status(400).json({ ok: false, msg: '이메일/비밀번호를 모두 입력해 주세요.' });
-  }
-
-  const user = users.find(u => u.email === email && u.password === password);
-  if (!user) {
-    return res.status(401).json({ ok: false, msg: '이메일 또는 비밀번호가 올바르지 않습니다.' });
-  }
-
-  console.log('[LOGIN]', email);
-  // 데모 토큰
-  const fakeToken = 'demo-token-' + Date.now();
-
-  return res.json({
-    ok: true,
-    email: user.email,
-    name: user.name,
-    token: fakeToken,
-  });
-});
-
-// ======================
-// 5. AI 이미지 생성 API (데모)
-//     POST /api/gemini-image
-// ======================
-// 프론트에서는 prompt, count 를 보내지만
-// 지금은 진짜 AI 안 붙이고, 예쁜 샘플 이미지 URL을 돌려줌
-app.post('/api/gemini-image', (req, res) => {
-  const { prompt, count } = req.body || {};
-  console.log('[IMAGE]', { prompt, count });
-
-  // 샘플 용 이미지 (Unsplash)
-  const sampleImages = [
-    'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=1080',
-    'https://images.unsplash.com/photo-1529626455594-4ff0802cfb7e?w=1080',
-    'https://images.unsplash.com/photo-1520975918319-894d3c1a8d5e?w=1080',
-    'https://images.unsplash.com/photo-1544717305-996b815c338c?w=1080',
-    'https://images.unsplash.com/photo-1503342217505-b0a15ec3261c?w=1080',
-  ];
-
-  const n = Number(count) || 4;
-  const images = sampleImages.slice(0, n);
-
-  return res.json({
-    ok: true,
-    images,
-  });
-});
-
-// ======================
-// 6. 이미지 -> 영상 API (데모)
-//     POST /api/video-from-images
-// ======================
-// 아직 진짜 영상 생성은 안 붙였고,
-// 프론트에서는 이 API를 호출하면 "실패" 토스트를 띄우도록 만들어 둔 상태야.
-app.post('/api/video-from-images', (req, res) => {
-  console.log('[VIDEO]', req.body);
-  return res.status(501).json({
-    ok: false,
-    msg: '영상 생성 기능은 아직 준비 중입니다. (백엔드 미구현)',
-  });
-});
-
-// ======================
-// 7. 서버 시작
-// ======================
+// ===============================
+// 🚀 서버 실행
+// ===============================
 app.listen(PORT, () => {
   console.log(`✅ modemode.ai API server is running on http://localhost:${PORT}`);
 });
