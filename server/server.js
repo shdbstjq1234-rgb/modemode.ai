@@ -10,7 +10,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import dotenv from "dotenv";
 import multer from "multer";
-import bcrypt from "bcrypt";
+import bcrypt from "bcryptjs";   // ⭐ 변경됨 (bcrypt → bcryptjs)
 import jwt from "jsonwebtoken";
 import { v4 as uuidv4 } from "uuid";
 import { GoogleGenerativeAI } from "@google/generative-ai";
@@ -110,7 +110,7 @@ app.post("/signup", async (req, res) => {
         if (userDB.users.find(u => u.email === email))
             return res.json({ success: false, message: "이미 존재하는 이메일" });
 
-        const hashed = await bcrypt.hash(password, 12);
+        const hashed = bcrypt.hashSync(password, 12);   // ⭐ bcryptjs 버전
 
         userDB.users.push({
             id: uuidv4(),
@@ -138,7 +138,7 @@ app.post("/login", async (req, res) => {
         const user = userDB.users.find(u => u.email === email);
         if (!user) return res.json({ success: false, message: "이메일 없음" });
 
-        const match = await bcrypt.compare(password, user.password);
+        const match = bcrypt.compareSync(password, user.password); // ⭐ bcryptjs
         if (!match) return res.json({ success: false, message: "비밀번호 오류" });
 
         const token = jwt.sign({ id: user.id, email: user.email }, JWT_SECRET, {
@@ -152,9 +152,9 @@ app.post("/login", async (req, res) => {
 });
 
 // ==============================
-// 모델 목록
+// 모델 목록  ⭐ 중요: /api/models → /models 로 원복
 // ==============================
-app.get("/api/models", (req, res) => {
+app.get("/models", (req, res) => {
     res.json({ success: true, models: modelDB.models });
 });
 
