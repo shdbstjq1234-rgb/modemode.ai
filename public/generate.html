@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>AI 패션 생성 - ModeMode.ai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            background: #0d0d0d;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 25px 0;
+            font-size: 26px;
+        }
+
+        #modelPreview {
+            width: 160px;
+            height: 220px;
+            object-fit: cover;
+            border-radius: 10px;
+            display: block;
+            margin: 10px auto 25px auto;
+            border: 1px solid #444;
+        }
+
+        .wrap {
+            width: 100%;
+            max-width: 420px;
+            margin: auto;
+            padding: 20px;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            background: #111;
+            border: 1px solid #333;
+            color: white;
+            border-radius: 8px;
+            margin-bottom: 16px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #5a4fff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-top: 10px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+
+        button:hover {
+            background: #6d63ff;
+        }
+
+        #promptOutput {
+            height: 120px;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>AI 패션 생성</h1>
+
+<img id="modelPreview" src="" alt="model">
+
+<div class="wrap">
+
+    <label>샷 종류</label>
+    <select id="shot">
+        <option value="full body">전신</option>
+        <option value="half body">반신</option>
+        <option value="portrait">프로필</option>
+    </select>
+
+    <label>포즈</label>
+    <select id="pose">
+        <option value="standing">서 있는 포즈</option>
+        <option value="sitting">앉아 있는 포즈</option>
+        <option value="walking">걷는 포즈</option>
+    </select>
+
+    <label>감정</label>
+    <select id="emotion">
+        <option value="smile">스마일</option>
+        <option value="neutral">중립</option>
+        <option value="serious">시크/차가움</option>
+    </select>
+
+    <label>추가 설명</label>
+    <textarea id="desc" placeholder="예: 오버핏 패딩 착용"></textarea>
+
+    <label>옷 이미지 업로드</label>
+    <input type="file" id="cloth">
+
+    <button id="generatePromptBtn">프롬프트 자동 생성</button>
+
+    <label>프롬프트 결과</label>
+    <textarea id="promptOutput"></textarea>
+
+    <button id="generateImageBtn">이미지 생성</button>
+
+</div>
+
+<!-- 🔥 app.js 절대경로로 교체 -->
+<script src="/app.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        prepareGeneratePage();
+    });
+</script>
+
+</body>
+</html>

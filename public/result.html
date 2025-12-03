@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>생성 결과 - ModeMode.ai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            background: #0d0d0d;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        h1 {
+            text-align: center;
+            margin: 30px 0;
+            font-size: 26px;
+        }
+
+        #resultImg {
+            width: 90%;
+            max-width: 420px;
+            border-radius: 12px;
+            display: block;
+            margin: auto;
+            border: 1px solid #444;
+        }
+
+        button {
+            width: 90%;
+            max-width: 420px;
+            display: block;
+            margin: 20px auto;
+            padding: 14px;
+            background: #5a4fff;
+            color: white;
+            border-radius: 8px;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+
+<h1>생성된 이미지</h1>
+
+<img id="resultImg" src="" alt="결과">
+
+<button onclick="location.href='index.html'">홈으로 돌아가기</button>
+
+<!-- 🔥 app.js 절대경로로 교체 -->
+<script src="/app.js"></script>
+<script>
+    document.addEventListener("DOMContentLoaded", () => {
+        loadResult();
+    });
+</script>
+
+</body>
+</html>

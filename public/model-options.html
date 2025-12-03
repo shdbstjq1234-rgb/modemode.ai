@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <title>옵션 선택</title>
+  <link rel="stylesheet" href="styles.css">
+  <script defer src="include.js"></script>
+</head>
+<body>
+
+<div id="header"></div>
+
+<section class="container">
+  <h2>2단계: 옷 & 포즈 선택</h2>
+
+  <h3>착용할 옷</h3>
+  <input id="clothesInput" placeholder="예: 블랙 후드티" class="input">
+
+  <h3>포즈 선택</h3>
+  <select id="poseSelect" class="input">
+    <option value="서있는 포즈">서있는 포즈</option>
+    <option value="앉아있는 포즈">앉아있는 포즈</option>
+    <option value="걷는 포즈">걷는 포즈</option>
+  </select>
+
+  <button class="btn" onclick="saveOptions()">다음 단계</button>
+</section>
+
+<div id="footer"></div>
+
+<script>
+function saveOptions() {
+  const clothes = document.getElementById("clothesInput").value;
+  const pose = document.getElementById("poseSelect").value;
+
+  if (!clothes) return alert("옷을 입력하세요.");
+
+  localStorage.setItem("selectedClothes", clothes);
+  localStorage.setItem("selectedPose", pose);
+
+  window.location.href = "generate.html";
+}
+</script>
+
+</body>
+</html>

@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <title>로그인 - ModeMode.ai</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <style>
+        body {
+            margin: 0;
+            background: #0d0d0d;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 380px;
+            margin: 90px auto;
+            padding: 30px;
+            background: #111;
+            border: 1px solid #333;
+            border-radius: 12px;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .input-box {
+            margin-bottom: 20px;
+        }
+
+        .input-box label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 14px;
+            opacity: 0.8;
+        }
+
+        .input-box input {
+            width: 100%;
+            padding: 12px;
+            background: #1a1a1a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        button {
+            width: 100%;
+            padding: 14px;
+            background: #5a4fff;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.2s;
+        }
+
+        button:hover {
+            background: #6f64ff;
+        }
+
+        .bottom-text {
+            text-align: center;
+            margin-top: 18px;
+            opacity: 0.8;
+            font-size: 14px;
+        }
+
+        .bottom-text span {
+            color: #5a4fff;
+            cursor: pointer;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>로그인</h1>
+
+        <div class="input-box">
+            <label>이메일</label>
+            <input type="email" id="email" placeholder="email@example.com">
+        </div>
+
+        <div class="input-box">
+            <label>비밀번호</label>
+            <input type="password" id="password" placeholder="비밀번호 입력">
+        </div>
+
+        <button id="loginBtn">로그인</button>
+
+        <div class="bottom-text">
+            계정이 없나요?
+            <span onclick="location.href='signup.html'">회원가입</span>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById("loginBtn").onclick = async () => {
+            const email = document.getElementById("email").value.trim();
+            const password = document.getElementById("password").value.trim();
+
+            if (!email || !password) {
+                alert("이메일과 비밀번호를 입력하세요.");
+                return;
+            }
+
+            try {
+                const res = await fetch("/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ email, password })
+                });
+
+                const data = await res.json();
+
+                if (!data.success) {
+                    alert(data.message || "로그인 실패");
+                    return;
+                }
+
+                localStorage.setItem("token", data.token);
+
+                alert("로그인 성공!");
+                location.href = "index.html";
+
+            } catch (err) {
+                console.error(err);
+                alert("서버 오류 발생");
+            }
+        };
+    </script>
+</body>
+</html>

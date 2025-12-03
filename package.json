@@ -1,0 +1,16 @@
+{
+  "name": "modemode-ai-server",
+  "version": "1.0.0",
+  "main": "server.js",
+  "type": "module",
+  "dependencies": {
+    "@google/generative-ai": "latest",
+    "bcrypt": "latest",
+    "cors": "latest",
+    "dotenv": "latest",
+    "express": "latest",
+    "jsonwebtoken": "latest",
+    "multer": "latest",
+    "uuid": "latest"
+  }
+}
